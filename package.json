@@ -1,0 +1,59 @@
+{
+  "name": "hachiko",
+  "version": "0.1.0",
+  "main": "lib/index.js",
+  "jsnext:main": "es/index.js",
+  "files": [
+    "lib",
+    "es",
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE.md"
+  ],
+  "description": "Hachiko aims to be the easiest, fastest and most practical of all data structure libraries for FP in JS",
+  "scripts": {
+    "test": "BABEL_ENV=cjs jest --config .jestrc.json",
+    "test:watch": "npm test -- --watch",
+    "test:cov": "npm test -- --coverage",
+    "lint": "tslint -c tslint.json src/**/*.ts",
+    "clean": "rm -rf es lib",
+    "build:es": "tsc -m es2015 -p tsconfig.json --outDir es",
+    "build:cjs": "tsc -m commonjs -p tsconfig.json --outDir lib",
+    "build": "npm run build:es && npm run build:cjs",
+    "prepublish": "npm run clean && npm run build",
+    "preversion": "npm run clean && npm run test",
+    "version": "npm run build",
+    "postversion": "git push && git push --tags"
+  },
+  "author": "Phil Plückthun <phil@plckthn.me> (https://github.com/philpl)",
+  "bugs": {
+    "url": "https://github.com/philpl/hachiko/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/philpl/hachiko.git"
+  },
+  "license": "CC0-1.0",
+  "keywords": [
+    "hachiko",
+    "data structures",
+    "data",
+    "immutable",
+    "state",
+    "fp",
+    "immutable.js",
+    "champ",
+    "trie"
+  ],
+  "engines": {
+    "npm": ">= 2.0.0",
+    "node": ">= 0.12.0"
+  },
+  "devDependencies": {
+    "jest": "^17.0.0",
+    "tslint": "^3.15.1",
+    "tslint-config-standard": "^1.5.0",
+    "typescript": "^2.0.9"
+  }
+}

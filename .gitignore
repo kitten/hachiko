@@ -1,0 +1,13 @@
+# Node
+node_modules
+*.log
+lib/
+es/
+dist/
+npm-debug.log
+_book/
+./*.js
+
+# Mac
+.DS_Store
+.*/
