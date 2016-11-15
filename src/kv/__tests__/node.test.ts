@@ -62,7 +62,8 @@ describe('KVNode', () => {
           ],
           dataMap: 3,
           level: 1,
-          nodeMap: 0
+          nodeMap: 0,
+          size: 2
         }, {
           content: [
             0, '0',
@@ -70,11 +71,13 @@ describe('KVNode', () => {
           ],
           dataMap: 3,
           level: 1,
-          nodeMap: 0
+          nodeMap: 0,
+          size: 2
         }],
         dataMap: 0,
         level: 0,
-        nodeMap: 3
+        nodeMap: 3,
+        size: 4
       })
     })
 

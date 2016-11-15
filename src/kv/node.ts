@@ -16,17 +16,20 @@ class KVNode<T> {
   public content: (KVKey | T | KVNode<T>)[]
   public dataMap: Bitmap
   public nodeMap: Bitmap
+  public size: number
 
   public constructor(
     content?: (KVKey | T | KVNode<T>)[],
     dataMap?: number,
     nodeMap?: number,
-    level?: number
+    level?: number,
+    size?: number
   ) {
     this.content = content || []
     this.dataMap = dataMap || 0
     this.nodeMap = nodeMap || 0
     this.level = level || 0
+    this.size = size || 0
     return this
   }
 
@@ -77,9 +80,18 @@ class KVNode<T> {
       const subNode = content[index] as KVNode<T>
 
       const _content = content.slice()
-      _content[index] = subNode.set(hash, key, value)
+      const _subNode = subNode.set(hash, key, value)
+      _content[index] = _subNode
 
-      return this.modify(_content)
+      const diffSize = _subNode.size - subNode.size
+
+      return new KVNode<T>(
+        _content,
+        this.dataMap,
+        this.nodeMap,
+        this.level,
+        this.size + diffSize
+      )
     }
 
     // Search for data with prefix
@@ -92,7 +104,14 @@ class KVNode<T> {
         // Overwrite value on this node
         const _content = content.slice()
         _content[index + 1] = value
-        return this.modify(_content)
+
+        return new KVNode<T>(
+          _content,
+          this.dataMap,
+          this.nodeMap,
+          this.level,
+          this.size
+        )
       }
 
       const _value = content[index + 1] as T
@@ -109,20 +128,6 @@ class KVNode<T> {
     return this.addDataEntry(bitPosition, key, value)
   }
 
-  private modify(
-    content?: (KVKey | T | KVNode<T>)[],
-    dataMap?: number,
-    nodeMap?: number,
-    level?: number
-  ): KVNode<T> {
-    return new KVNode<T>(
-      content || this.content,
-      typeof dataMap === 'number' ? dataMap : this.dataMap,
-      typeof nodeMap === 'number' ? nodeMap : this.nodeMap,
-      typeof level === 'number' ? level : this.level
-    )
-  }
-
   private addDataEntry(position: number, key: KVKey, value: T): KVNode<T> {
     const dataMap = setBitOnBitmap(this.dataMap, position)
     const index = WIDTH * indexBitOnBitmap(dataMap, position)
@@ -130,9 +135,12 @@ class KVNode<T> {
     const content = this.content.slice()
     content.splice(index, 0, key, value)
 
-    return this.modify(
+    return new KVNode<T>(
       content,
-      dataMap
+      dataMap,
+      this.nodeMap,
+      this.level,
+      this.size + 1
     )
   }
 
@@ -140,8 +148,15 @@ class KVNode<T> {
     const level = this.level + 1
     const mask = maskHash(hash(key), level)
     const dataMap = toBitmap(mask)
+    const content = [ key, value ]
 
-    return new KVNode<T>([ key, value ], dataMap, 0, level)
+    return new KVNode<T>(
+      content,
+      dataMap,
+      0,
+      level,
+      1
+    )
   }
 
   private addNodeEntry(position: number, subNode: KVNode<T>) {
@@ -156,7 +171,13 @@ class KVNode<T> {
     const nodeIndex = content.length - indexBitOnBitmap(nodeMap, position)
     content.splice(nodeIndex, 0, subNode)
 
-    return this.modify(content, dataMap, nodeMap)
+    return new KVNode<T>(
+      content,
+      dataMap,
+      nodeMap,
+      this.level,
+      this.size - 1 + subNode.size
+    )
   }
 }
 
