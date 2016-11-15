@@ -1,4 +1,5 @@
 import KVNode from '../node'
+import hash from '../../util/hash'
 
 describe('KVNode', () => {
   describe('constructor', () => {
@@ -16,9 +17,9 @@ describe('KVNode', () => {
   describe('set', () => {
     it('should set data without collisions on one node', () => {
       const node = new KVNode<string>()
-        .set(0, '00')
-        .set(1, '01')
-        .set(2, '10')
+        .set(hash(0), 0, '00')
+        .set(hash(1), 1, '01')
+        .set(hash(2), 2, '10')
 
       expect(node.content).toEqual([
         0, '00',
@@ -32,9 +33,9 @@ describe('KVNode', () => {
 
     it('should set data in order on one node', () => {
       const node = new KVNode<string>()
-        .set(1, '01')
-        .set(0, '00')
-        .set(3, '11')
+        .set(hash(1), 1, '01')
+        .set(hash(0), 0, '00')
+        .set(hash(3), 3, '11')
 
       expect(node.content).toEqual([
         0, '00',
@@ -48,10 +49,10 @@ describe('KVNode', () => {
 
     it('should set data with collisions on subnodes', () => {
       const node = new KVNode<string>()
-        .set(0, '0')
-        .set(32, '0')
-        .set(1, '1')
-        .set(33, '1')
+        .set(hash(0), 0, '0')
+        .set(hash(32), 32, '0')
+        .set(hash(1), 1, '1')
+        .set(hash(33),33, '1')
 
       expect(node).toEqual({
         content: [{
@@ -79,9 +80,9 @@ describe('KVNode', () => {
 
     it('should overwrite values with the same keys', () => {
       const node = new KVNode<string>()
-        .set(0, '0')
-        .set(1, '1')
-        .set(0, 'test')
+        .set(hash(0), 0, '0')
+        .set(hash(1), 1, '1')
+        .set(hash(0), 0, 'test')
 
       expect(node.content).toEqual([
         0, 'test',
