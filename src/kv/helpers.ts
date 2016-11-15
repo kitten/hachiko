@@ -51,12 +51,13 @@ function addNodeEntry<T>(node: KVNode<T>, position: number, subNode: KVNode<T>) 
   const nodeMap = setBitOnBitmap(node.nodeMap, position)
   const dataIndex = WIDTH * indexBitOnBitmap(node.dataMap, position)
   const dataMap = unsetBitOnBitmap(node.dataMap, position)
-  const nodeIndex = indexBitOnBitmap(nodeMap, position)
 
   // NOTE: Not using fpSplice for micro optimisation
   const content = node.content.slice()
   content.splice(dataIndex, 2)
-  content.splice(content.length - nodeIndex, 0, subNode)
+
+  const nodeIndex = content.length - indexBitOnBitmap(nodeMap, position)
+  content.splice(nodeIndex, 0, subNode)
 
   return modify<T>(node, content, dataMap, nodeMap)
 }
@@ -85,8 +86,8 @@ export function get<T>(node: KVNode<T>, hash: number, key: KVKey): T {
   const nodeBit = getBitOnBitmap(nodeMap, bitPosition)
   if (nodeBit) {
     // prefix lives on a sub-node
-    const index = WIDTH * indexBitOnBitmap(nodeMap, bitPosition)
-    const subNode = content[content.length - 1 - index] as KVNode<T>
+    const index = content.length - 1 - WIDTH * indexBitOnBitmap(nodeMap, bitPosition)
+    const subNode = content[index] as KVNode<T>
 
     return get<T>(subNode, hash, key)
   }
@@ -104,10 +105,13 @@ export function set<T>(node: KVNode<T>, hash: number, key: KVKey, value: T): KVN
   const nodeBit = getBitOnBitmap(nodeMap, bitPosition)
   if (nodeBit) {
     // Set (key, value) on sub-node
-    const index = WIDTH * indexBitOnBitmap(nodeMap, bitPosition)
-    const subNode = content[content.length - 1 - index] as KVNode<T>
+    const index = content.length - 1 - WIDTH * indexBitOnBitmap(nodeMap, bitPosition)
+    const subNode = set<T>(content[index] as KVNode<T>, hash, key, value)
 
-    return set<T>(subNode, hash, key, value)
+    const _content = content.slice()
+    _content[index] = subNode
+
+    return modify<T>(node, _content)
   }
 
   // Search for data with prefix
