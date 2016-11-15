@@ -8,7 +8,6 @@ import {
   Bitmap
 } from '../util/bitmap'
 
-import fpSplice from '../util/fpSplice'
 import hash from '../util/hash'
 import { WIDTH, KVKey } from './constants'
 
@@ -127,7 +126,9 @@ class KVNode<T> {
   private addDataEntry(position: number, key: KVKey, value: T): KVNode<T> {
     const dataMap = setBitOnBitmap(this.dataMap, position)
     const index = WIDTH * indexBitOnBitmap(dataMap, position)
-    const content = fpSplice(this.content, index, 0, key, value)
+
+    const content = this.content.slice()
+    content.splice(index, 0, key, value)
 
     return this.modify(
       content,
