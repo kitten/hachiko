@@ -4,12 +4,12 @@ import {
   setBitOnBitmap,
   unsetBitOnBitmap,
   indexBitOnBitmap,
-  toBitmap
-} from '../bitmap'
+  toBitmap,
+  Bitmap
+} from '../util/bitmap'
 
 import fpSplice from '../util/fpSplice'
 import hash from '../util/hash'
-import { Bitmap } from '../bitmap'
 import { WIDTH, KVKey } from './constants'
 
 class KVNode<T> {

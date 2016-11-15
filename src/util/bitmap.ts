@@ -1,4 +1,4 @@
-import hammingWeight from './util/hammingWeight'
+import hammingWeight from './hammingWeight'
 
 const SIZE = 5
 const BUCKET_SIZE = Math.pow(2, SIZE) // 32
