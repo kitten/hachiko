@@ -148,14 +148,16 @@ class KVNode<T> {
     const level = this.level + 1
     const mask = maskHash(hash(key), level)
     const dataMap = toBitmap(mask)
+    const nodeMap = 0
     const content = [ key, value ]
+    const size = 1
 
     return new KVNode<T>(
       content,
       dataMap,
-      0,
+      nodeMap,
       level,
-      1
+      size
     )
   }
 
