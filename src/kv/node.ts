@@ -25,7 +25,7 @@ class KVNode<T> {
     level?: number,
     size?: number
   ) {
-    this.content = content || []
+    this.content = content || new Array(64)
     this.dataMap = dataMap || 0
     this.nodeMap = nodeMap || 0
     this.level = level || 0
@@ -33,7 +33,12 @@ class KVNode<T> {
     return this
   }
 
-  public get(hash: number, key: KVKey): T {
+  public get(key: KVKey): T {
+    const hashCode = hash(key)
+    return this.__get(hashCode, key)
+  }
+
+  public __get(hash: number, key: KVKey): T {
     const { content, dataMap, nodeMap, level } = this
 
     const bitPosition = maskHash(hash, level)
@@ -60,14 +65,19 @@ class KVNode<T> {
       const index = content.length - 1 - WIDTH * indexBitOnBitmap(nodeMap, bitPosition)
       const subNode = content[index] as KVNode<T>
 
-      return subNode.get(hash, key)
+      return subNode.__get(hash, key)
     }
 
     // MISS: prefix is unknown on subtree
     return undefined
   }
 
-  public set(hash: number, key: KVKey, value: T): KVNode<T> {
+  public set(key: KVKey, value: T): KVNode<T> {
+    const hashCode = hash(key)
+    return this.__set(hashCode, key, value)
+  }
+
+  public __set(hash: number, key: KVKey, value: T): KVNode<T> {
     const { content, dataMap, nodeMap, level } = this
 
     const bitPosition = maskHash(hash, level)
@@ -80,7 +90,7 @@ class KVNode<T> {
       const subNode = content[index] as KVNode<T>
 
       const _content = content.slice()
-      const _subNode = subNode.set(hash, key, value)
+      const _subNode = subNode.__set(hash, key, value)
       _content[index] = _subNode
 
       const diffSize = _subNode.size - subNode.size
@@ -119,7 +129,7 @@ class KVNode<T> {
       // Create subnode from collision (_key, _value) and set (key, value) on it
       // Thus following collisions will be resolved recursively
       const subNode = this.createSubNode(_key, _value)
-        .set(hash, key, value)
+        .__set(hash, key, value)
 
       // Add new subnode to the current node
       return this.addNodeEntry(bitPosition, subNode)
