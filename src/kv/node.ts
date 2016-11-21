@@ -62,7 +62,7 @@ class KVNode<T> {
     const nodeBit = getBitOnBitmap(nodeMap, bitPosition)
     if (nodeBit) {
       // prefix lives on a sub-node
-      const index = content.length - 1 - WIDTH * indexBitOnBitmap(nodeMap, bitPosition)
+      const index = content.length - 1 - indexBitOnBitmap(nodeMap, bitPosition)
       const subNode = content[index] as KVNode<T>
 
       return subNode.__get(hash, key)
@@ -86,7 +86,7 @@ class KVNode<T> {
     const nodeBit = getBitOnBitmap(nodeMap, bitPosition)
     if (nodeBit) {
       // Set (key, value) on sub-node
-      const index = content.length - 1 - WIDTH * indexBitOnBitmap(nodeMap, bitPosition)
+      const index = content.length - 1 - indexBitOnBitmap(nodeMap, bitPosition)
       const subNode = content[index] as KVNode<T>
 
       const _content = content.slice()
