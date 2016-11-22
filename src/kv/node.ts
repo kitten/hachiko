@@ -9,18 +9,18 @@ import {
 } from '../util/bitmap'
 
 import hash from '../util/hash'
-import { WIDTH, KVKey } from './constants'
+import { WIDTH, KVTuple, KVKey } from './constants'
 
 class KVNode<T> {
   public level: number
-  public content: (KVKey | T)[]
+  public content: KVTuple<T>[]
   public subnodes: KVNode<T>[]
   public dataMap: Bitmap
   public nodeMap: Bitmap
   public size: number
 
   public constructor(
-    content?: (KVKey | T)[],
+    content?: KVTuple<T>[],
     subnodes?: KVNode<T>[],
     dataMap?: number,
     nodeMap?: number,
@@ -50,12 +50,12 @@ class KVNode<T> {
     if (dataBit) {
       // prefix lives on this node
 
-      const index = WIDTH * indexBitOnBitmap(dataMap, bitPosition)
-      const _key = content[index] as KVKey
+      const tuple = content[indexBitOnBitmap(dataMap, bitPosition)]
+      const _key = tuple[0] as KVKey
 
       if (_key === key) {
         // HIT: key was found and value can be returned
-        return content[index + 1] as T
+        return tuple[1] as T
       }
 
       // MISS: keys don't match up
@@ -112,13 +112,14 @@ class KVNode<T> {
     // Search for data with prefix
     const dataBit = getBitOnBitmap(dataMap, bitPosition)
     if (dataBit) {
-      const index = WIDTH * indexBitOnBitmap(dataMap, bitPosition)
-      const _key = content[index] as KVKey
+      const index = indexBitOnBitmap(dataMap, bitPosition)
+      const tuple = content[index]
+      const _key = tuple[0] as KVKey
 
       if (_key === key) {
         // Overwrite value on this node
         const _content = content.slice()
-        _content[index + 1] = value
+        _content[index] = [key, value]
 
         return new KVNode<T>(
           _content,
@@ -130,7 +131,7 @@ class KVNode<T> {
         )
       }
 
-      const _value = content[index + 1] as T
+      const _value = tuple[1] as T
 
       // Create subnode from collision (_key, _value) and set (key, value) on it
       // Thus following collisions will be resolved recursively
@@ -149,7 +150,7 @@ class KVNode<T> {
     const index = WIDTH * indexBitOnBitmap(dataMap, position)
 
     const content = this.content.slice()
-    content.splice(index, 0, key, value)
+    content.splice(index, 0, [key, value])
 
     return new KVNode<T>(
       content,
@@ -166,9 +167,12 @@ class KVNode<T> {
     const mask = maskHash(hash(key), level)
     const dataMap = toBitmap(mask)
     const nodeMap = 0
-    const content = [ key, value ]
     const subnodes: KVNode<T>[] = []
     const size = 1
+
+    const content = [(
+      [ key, value ] as KVTuple<T>
+    )]
 
     return new KVNode<T>(
       content,
@@ -186,7 +190,7 @@ class KVNode<T> {
     const dataMap = unsetBitOnBitmap(this.dataMap, position)
 
     const content = this.content.slice()
-    content.splice(dataIndex, 2)
+    content.splice(dataIndex, 1)
 
     const nodeIndex = content.length - indexBitOnBitmap(nodeMap, position)
     const subnodes = this.subnodes.slice()

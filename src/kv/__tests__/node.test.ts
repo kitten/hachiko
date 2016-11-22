@@ -1,9 +1,13 @@
 import KVNode from '../node'
+import { KVTuple } from '../constants'
 
 describe('KVNode', () => {
   describe('constructor', () => {
     it('should construct a node using the provided data', () => {
-      const content = [ 1, 1 ]
+      const content = [(
+        [ 1, 1 ] as KVTuple<number>
+      )]
+
       const node = new KVNode<number>(content, [], 1, 0, 1)
 
       expect(node.content).toBe(content)
