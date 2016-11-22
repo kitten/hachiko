@@ -13,19 +13,22 @@ import { WIDTH, KVKey } from './constants'
 
 class KVNode<T> {
   public level: number
-  public content: (KVKey | T | KVNode<T>)[]
+  public content: (KVKey | T)[]
+  public subnodes: KVNode<T>[]
   public dataMap: Bitmap
   public nodeMap: Bitmap
   public size: number
 
   public constructor(
-    content?: (KVKey | T | KVNode<T>)[],
+    content?: (KVKey | T)[],
+    subnodes?: KVNode<T>[],
     dataMap?: number,
     nodeMap?: number,
     level?: number,
     size?: number
   ) {
-    this.content = content || new Array(64)
+    this.content = content || []
+    this.subnodes = subnodes || []
     this.dataMap = dataMap || 0
     this.nodeMap = nodeMap || 0
     this.level = level || 0
@@ -39,10 +42,10 @@ class KVNode<T> {
   }
 
   public __get(hash: number, key: KVKey): T {
-    const { content, dataMap, nodeMap, level } = this
 
-    const bitPosition = maskHash(hash, level)
+    const bitPosition = maskHash(hash, this.level)
 
+    const { content, dataMap } = this
     const dataBit = getBitOnBitmap(dataMap, bitPosition)
     if (dataBit) {
       // prefix lives on this node
@@ -59,11 +62,12 @@ class KVNode<T> {
       return undefined
     }
 
+    const { subnodes, nodeMap } = this
     const nodeBit = getBitOnBitmap(nodeMap, bitPosition)
     if (nodeBit) {
       // prefix lives on a sub-node
-      const index = content.length - 1 - indexBitOnBitmap(nodeMap, bitPosition)
-      const subNode = content[index] as KVNode<T>
+      const index = indexBitOnBitmap(nodeMap, bitPosition)
+      const subNode = subnodes[index] as KVNode<T>
 
       return subNode.__get(hash, key)
     }
@@ -78,7 +82,7 @@ class KVNode<T> {
   }
 
   public __set(hash: number, key: KVKey, value: T): KVNode<T> {
-    const { content, dataMap, nodeMap, level } = this
+    const { content, subnodes, dataMap, nodeMap, level } = this
 
     const bitPosition = maskHash(hash, level)
 
@@ -86,17 +90,18 @@ class KVNode<T> {
     const nodeBit = getBitOnBitmap(nodeMap, bitPosition)
     if (nodeBit) {
       // Set (key, value) on sub-node
-      const index = content.length - 1 - indexBitOnBitmap(nodeMap, bitPosition)
-      const subNode = content[index] as KVNode<T>
+      const index = indexBitOnBitmap(nodeMap, bitPosition)
+      const subNode = subnodes[index] as KVNode<T>
 
-      const _content = content.slice()
+      const _subnodes = subnodes.slice()
       const _subNode = subNode.__set(hash, key, value)
-      _content[index] = _subNode
+      _subnodes[index] = _subNode
 
       const diffSize = _subNode.size - subNode.size
 
       return new KVNode<T>(
-        _content,
+        this.content,
+        _subnodes,
         this.dataMap,
         this.nodeMap,
         this.level,
@@ -117,6 +122,7 @@ class KVNode<T> {
 
         return new KVNode<T>(
           _content,
+          this.subnodes,
           this.dataMap,
           this.nodeMap,
           this.level,
@@ -147,6 +153,7 @@ class KVNode<T> {
 
     return new KVNode<T>(
       content,
+      this.subnodes,
       dataMap,
       this.nodeMap,
       this.level,
@@ -160,10 +167,12 @@ class KVNode<T> {
     const dataMap = toBitmap(mask)
     const nodeMap = 0
     const content = [ key, value ]
+    const subnodes: KVNode<T>[] = []
     const size = 1
 
     return new KVNode<T>(
       content,
+      subnodes,
       dataMap,
       nodeMap,
       level,
@@ -176,15 +185,16 @@ class KVNode<T> {
     const dataIndex = WIDTH * indexBitOnBitmap(this.dataMap, position)
     const dataMap = unsetBitOnBitmap(this.dataMap, position)
 
-    // NOTE: Not using fpSplice for micro optimisation
     const content = this.content.slice()
     content.splice(dataIndex, 2)
 
     const nodeIndex = content.length - indexBitOnBitmap(nodeMap, position)
-    content.splice(nodeIndex, 0, subNode)
+    const subnodes = this.subnodes.slice()
+    subnodes.splice(nodeIndex, 0, subNode)
 
     return new KVNode<T>(
       content,
+      subnodes,
       dataMap,
       nodeMap,
       this.level,

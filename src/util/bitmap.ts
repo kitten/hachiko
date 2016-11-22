@@ -19,8 +19,9 @@ export const unsetBitOnBitmap = (bitmap: Bitmap, position: number): Bitmap => (
   bitmap ^ toBitmap(position)
 )
 
-export const getBitOnBitmap = (bitmap: Bitmap, position: number): boolean => (
-  (bitmap & toBitmap(position)) > 0
+// NOTE: This should only be used to check truthiness
+export const getBitOnBitmap = (bitmap: Bitmap, position: number): number => (
+  (bitmap & toBitmap(position))
 )
 
 export const maskHash = (hash: number, level: number): Mask => (

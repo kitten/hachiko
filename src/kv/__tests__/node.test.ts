@@ -4,11 +4,11 @@ describe('KVNode', () => {
   describe('constructor', () => {
     it('should construct a node using the provided data', () => {
       const content = [ 1, 1 ]
-      const node = new KVNode<number>(content, 1, 1, 1)
+      const node = new KVNode<number>(content, [], 1, 0, 1)
 
       expect(node.content).toBe(content)
       expect(node.dataMap).toBe(1)
-      expect(node.nodeMap).toBe(1)
+      expect(node.nodeMap).toBe(0)
       expect(node.level).toBe(1)
     })
   })
