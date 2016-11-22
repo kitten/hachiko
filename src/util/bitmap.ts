@@ -7,28 +7,24 @@ const MASK = BUCKET_SIZE - 1
 export type Bitmap = number
 export type Mask = number
 
-export const toBitmap = (position: number): Bitmap => (
-  1 << position
+export const setBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): Bitmap => (
+  bitmap | positionBitmap
 )
 
-export const setBitOnBitmap = (bitmap: Bitmap, position: number): Bitmap => (
-  bitmap | (1 << position)
-)
-
-export const unsetBitOnBitmap = (bitmap: Bitmap, position: number): Bitmap => (
-  bitmap ^ (1 << position)
+export const unsetBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): Bitmap => (
+  bitmap ^ positionBitmap
 )
 
 // NOTE: This should only be used to check truthiness
-export const getBitOnBitmap = (bitmap: Bitmap, position: number): number => (
-  (bitmap & (1 << position))
+export const getBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): number => (
+  (bitmap & positionBitmap)
 )
 
 export const maskHash = (hash: number, level: number): Mask => (
   (hash >>> (level * SIZE)) & MASK
 )
 
-export const indexBitOnBitmap = (bitmap: Bitmap, position: number): number => (
-  hammingWeight(bitmap & ((1 << position) - 1))
+export const indexBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): number => (
+  hammingWeight(bitmap & (positionBitmap - 1))
 )
 

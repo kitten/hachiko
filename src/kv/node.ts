@@ -4,7 +4,6 @@ import {
   setBitOnBitmap,
   unsetBitOnBitmap,
   indexBitOnBitmap,
-  toBitmap,
   Bitmap
 } from '../util/bitmap'
 
@@ -42,15 +41,14 @@ class KVNode<T> {
   }
 
   public __get(hash: number, key: KVKey): T {
-
-    const bitPosition = maskHash(hash, this.level)
+    const positionBitmap: Bitmap = 1 << maskHash(hash, this.level)
 
     const { content, dataMap } = this
-    const dataBit = getBitOnBitmap(dataMap, bitPosition)
+    const dataBit = getBitOnBitmap(dataMap, positionBitmap)
     if (dataBit) {
       // prefix lives on this node
 
-      const tuple = content[indexBitOnBitmap(dataMap, bitPosition)]
+      const tuple = content[indexBitOnBitmap(dataMap, positionBitmap)]
       const _key = tuple[0] as KVKey
 
       if (_key === key) {
@@ -63,10 +61,10 @@ class KVNode<T> {
     }
 
     const { subnodes, nodeMap } = this
-    const nodeBit = getBitOnBitmap(nodeMap, bitPosition)
+    const nodeBit = getBitOnBitmap(nodeMap, positionBitmap)
     if (nodeBit) {
       // prefix lives on a sub-node
-      const index = indexBitOnBitmap(nodeMap, bitPosition)
+      const index = indexBitOnBitmap(nodeMap, positionBitmap)
       const subNode = subnodes[index] as KVNode<T>
 
       return subNode.__get(hash, key)
@@ -84,13 +82,13 @@ class KVNode<T> {
   public __set(hash: number, key: KVKey, value: T): KVNode<T> {
     const { content, subnodes, dataMap, nodeMap, level } = this
 
-    const bitPosition = maskHash(hash, level)
+    const positionBitmap: Bitmap = 1 << maskHash(hash, level)
 
     // Search for node with prefix
-    const nodeBit = getBitOnBitmap(nodeMap, bitPosition)
+    const nodeBit = getBitOnBitmap(nodeMap, positionBitmap)
     if (nodeBit) {
       // Set (key, value) on sub-node
-      const index = indexBitOnBitmap(nodeMap, bitPosition)
+      const index = indexBitOnBitmap(nodeMap, positionBitmap)
       const subNode = subnodes[index] as KVNode<T>
 
       const _subnodes = subnodes.slice()
@@ -110,9 +108,9 @@ class KVNode<T> {
     }
 
     // Search for data with prefix
-    const dataBit = getBitOnBitmap(dataMap, bitPosition)
+    const dataBit = getBitOnBitmap(dataMap, positionBitmap)
     if (dataBit) {
-      const index = indexBitOnBitmap(dataMap, bitPosition)
+      const index = indexBitOnBitmap(dataMap, positionBitmap)
       const tuple = content[index]
       const _key = tuple[0] as KVKey
 
@@ -139,15 +137,15 @@ class KVNode<T> {
         .__set(hash, key, value)
 
       // Add new subnode to the current node
-      return this.addNodeEntry(bitPosition, subNode)
+      return this.addNodeEntry(positionBitmap, subNode)
     }
 
-    return this.addDataEntry(bitPosition, key, value)
+    return this.addDataEntry(positionBitmap, key, value)
   }
 
-  private addDataEntry(position: number, key: KVKey, value: T): KVNode<T> {
-    const dataMap = setBitOnBitmap(this.dataMap, position)
-    const index = WIDTH * indexBitOnBitmap(dataMap, position)
+  private addDataEntry(positionBitmap: Bitmap, key: KVKey, value: T): KVNode<T> {
+    const dataMap = setBitOnBitmap(this.dataMap, positionBitmap)
+    const index = WIDTH * indexBitOnBitmap(dataMap, positionBitmap)
 
     const content = this.content.slice()
     content.splice(index, 0, [key, value])
@@ -165,7 +163,7 @@ class KVNode<T> {
   private createSubNode(key: KVKey, value: T): KVNode<T> {
     const level = this.level + 1
     const mask = maskHash(hash(key), level)
-    const dataMap = toBitmap(mask)
+    const dataMap = 1 << mask
     const nodeMap = 0
     const subnodes: KVNode<T>[] = []
     const size = 1
@@ -184,15 +182,15 @@ class KVNode<T> {
     )
   }
 
-  private addNodeEntry(position: number, subNode: KVNode<T>) {
-    const nodeMap = setBitOnBitmap(this.nodeMap, position)
-    const dataIndex = WIDTH * indexBitOnBitmap(this.dataMap, position)
-    const dataMap = unsetBitOnBitmap(this.dataMap, position)
+  private addNodeEntry(positionBitmap: Bitmap, subNode: KVNode<T>) {
+    const nodeMap = setBitOnBitmap(this.nodeMap, positionBitmap)
+    const dataIndex = WIDTH * indexBitOnBitmap(this.dataMap, positionBitmap)
+    const dataMap = unsetBitOnBitmap(this.dataMap, positionBitmap)
 
     const content = this.content.slice()
     content.splice(dataIndex, 1)
 
-    const nodeIndex = content.length - indexBitOnBitmap(nodeMap, position)
+    const nodeIndex = content.length - indexBitOnBitmap(nodeMap, positionBitmap)
     const subnodes = this.subnodes.slice()
     subnodes.splice(nodeIndex, 0, subNode)
 
