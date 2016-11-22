@@ -120,12 +120,12 @@ const addNodeEntry = <T>(
 }
 
 export const set = <T>(node: KVNode<T>, hash: number, key: KVKey, value: T): KVNode<T> => {
-  const { content, subnodes, dataMap, nodeMap, level } = node
+  const positionBitmap: Bitmap = 1 << maskHash(hash, node.level)
 
-  const positionBitmap: Bitmap = 1 << maskHash(hash, level)
+  const { subnodes, nodeMap } = node
+  const nodeBit = getBitOnBitmap(nodeMap, positionBitmap)
 
   // Search for node with prefix
-  const nodeBit = getBitOnBitmap(nodeMap, positionBitmap)
   if (nodeBit) {
     // Set (key, value) on sub-node
     const index = indexBitOnBitmap(nodeMap, positionBitmap)
@@ -147,8 +147,10 @@ export const set = <T>(node: KVNode<T>, hash: number, key: KVKey, value: T): KVN
     )
   }
 
-  // Search for data with prefix
+  const { content, dataMap } = node
   const dataBit = getBitOnBitmap(dataMap, positionBitmap)
+
+  // Search for data with prefix
   if (dataBit) {
     const index = indexBitOnBitmap(dataMap, positionBitmap)
     const tuple = content[index]
