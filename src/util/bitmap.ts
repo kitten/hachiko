@@ -12,16 +12,16 @@ export const toBitmap = (position: number): Bitmap => (
 )
 
 export const setBitOnBitmap = (bitmap: Bitmap, position: number): Bitmap => (
-  bitmap | toBitmap(position)
+  bitmap | (1 << position)
 )
 
 export const unsetBitOnBitmap = (bitmap: Bitmap, position: number): Bitmap => (
-  bitmap ^ toBitmap(position)
+  bitmap ^ (1 << position)
 )
 
 // NOTE: This should only be used to check truthiness
 export const getBitOnBitmap = (bitmap: Bitmap, position: number): number => (
-  (bitmap & toBitmap(position))
+  (bitmap & (1 << position))
 )
 
 export const maskHash = (hash: number, level: number): Mask => (
@@ -29,6 +29,6 @@ export const maskHash = (hash: number, level: number): Mask => (
 )
 
 export const indexBitOnBitmap = (bitmap: Bitmap, position: number): number => (
-  hammingWeight(bitmap & (toBitmap(position) - 1))
+  hammingWeight(bitmap & ((1 << position) - 1))
 )
 
