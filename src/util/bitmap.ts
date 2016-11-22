@@ -1,5 +1,3 @@
-import hammingWeight from './hammingWeight'
-
 const SIZE = 5
 const BUCKET_SIZE = Math.pow(2, SIZE) // 32
 const MASK = BUCKET_SIZE - 1
@@ -7,27 +5,35 @@ const MASK = BUCKET_SIZE - 1
 export type Bitmap = number
 export type Mask = number
 
-export const toBitmap = (position: number): Bitmap => (
-  1 << position
+// Binary sideways addition
+// See: http://jsperf.com/hamming-weight
+const hammingWeight = (x: number): number => {
+  x = x - ((x >> 1) & 0x55555555)
+  x = (x & 0x33333333) + ((x >> 2) & 0x33333333)
+  x = (x + (x >> 4)) & 0x0f0f0f0f
+  x = x + (x >> 8)
+  x = x + (x >> 16)
+  return x & 0x7f
+}
+
+export const setBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): Bitmap => (
+  bitmap | positionBitmap
 )
 
-export const setBitOnBitmap = (bitmap: Bitmap, position: number): Bitmap => (
-  bitmap | toBitmap(position)
+export const unsetBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): Bitmap => (
+  bitmap ^ positionBitmap
 )
 
-export const unsetBitOnBitmap = (bitmap: Bitmap, position: number): Bitmap => (
-  bitmap ^ toBitmap(position)
-)
-
-export const getBitOnBitmap = (bitmap: Bitmap, position: number): boolean => (
-  (bitmap & toBitmap(position)) > 0
+// NOTE: This should only be used to check truthiness
+export const getBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): number => (
+  (bitmap & positionBitmap)
 )
 
 export const maskHash = (hash: number, level: number): Mask => (
   (hash >>> (level * SIZE)) & MASK
 )
 
-export const indexBitOnBitmap = (bitmap: Bitmap, position: number): number => (
-  hammingWeight(bitmap & (toBitmap(position) - 1))
+export const indexBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): number => (
+  hammingWeight(bitmap & (positionBitmap - 1))
 )
 
