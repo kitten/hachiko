@@ -1,5 +1,4 @@
-// See: https://github.com/facebook/immutable-js/blob/master/src/Math.js
-export const smi = (x: number) => (
+const smi = (x: number) => (
   ((x >>> 1) & 0x40000000) | (x & 0xBFFFFFFF)
 )
 

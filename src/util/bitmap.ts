@@ -1,11 +1,20 @@
-import hammingWeight from './hammingWeight'
-
 const SIZE = 5
 const BUCKET_SIZE = Math.pow(2, SIZE) // 32
 const MASK = BUCKET_SIZE - 1
 
 export type Bitmap = number
 export type Mask = number
+
+// Binary sideways addition
+// See: http://jsperf.com/hamming-weight
+const hammingWeight = (x: number): number => {
+  x = x - ((x >> 1) & 0x55555555)
+  x = (x & 0x33333333) + ((x >> 2) & 0x33333333)
+  x = (x + (x >> 4)) & 0x0f0f0f0f
+  x = x + (x >> 8)
+  x = x + (x >> 16)
+  return x & 0x7f
+}
 
 export const setBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): Bitmap => (
   bitmap | positionBitmap
