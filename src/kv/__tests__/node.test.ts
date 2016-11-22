@@ -25,9 +25,9 @@ describe('KVNode', () => {
         .set(2, '10')
 
       expect(node.content).toEqual([
-        0, '00',
-        1, '01',
-        2, '10'
+        [0, '00'],
+        [1, '01'],
+        [2, '10']
       ])
 
       expect(node.dataMap).toBe(7) // 111
@@ -41,9 +41,9 @@ describe('KVNode', () => {
         .set(3, '11')
 
       expect(node.content).toEqual([
-        0, '00',
-        1, '01',
-        3, '11'
+        [0, '00'],
+        [1, '01'],
+        [3, '11']
       ])
 
       expect(node.dataMap).toBe(11) // 1011
@@ -58,20 +58,23 @@ describe('KVNode', () => {
         .set(33, '1')
 
       expect(node).toEqual({
-        content: [{
+        content: [],
+        subnodes: [{
           content: [
-            1, '1',
-            33, '1'
+            [1, '1'],
+            [33, '1']
           ],
+          subnodes: [],
           dataMap: 3,
           level: 1,
           nodeMap: 0,
           size: 2
         }, {
           content: [
-            0, '0',
-            32, '0'
+            [0, '0'],
+            [32, '0']
           ],
+          subnodes: [],
           dataMap: 3,
           level: 1,
           nodeMap: 0,
@@ -91,8 +94,8 @@ describe('KVNode', () => {
         .set(0, 'test')
 
       expect(node.content).toEqual([
-        0, 'test',
-        1, '1'
+        [0, 'test'],
+        [1, '1']
       ])
 
       expect(node.dataMap).toBe(3) // 11
