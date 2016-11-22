@@ -30,7 +30,7 @@ export const getBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): number =
 )
 
 export const maskHash = (hash: number, level: number): Mask => (
-  (hash >>> (level * SIZE)) & MASK
+  1 << ((hash >>> (level * SIZE)) & MASK)
 )
 
 export const indexBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): number => (

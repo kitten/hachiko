@@ -13,7 +13,7 @@ import KVNode from './node'
 import { KVTuple, KVKey } from './constants'
 
 export const get = <T>(node: KVNode<T>, hash: number, key: KVKey): T => {
-  const positionBitmap: Bitmap = 1 << maskHash(hash, node.level)
+  const positionBitmap: Bitmap = maskHash(hash, node.level)
 
   const { content, dataMap } = node
   const dataBit = getBitOnBitmap(dataMap, positionBitmap)
@@ -73,8 +73,7 @@ const createSubNode = <T>(
   key: KVKey,
   value: T
 ): KVNode<T> => {
-  const mask = maskHash(hash(key), level)
-  const dataMap = 1 << mask
+  const dataMap = maskHash(hash(key), level)
   const nodeMap = 0
   const subnodes: KVNode<T>[] = []
   const size = 1
@@ -120,7 +119,7 @@ const addNodeEntry = <T>(
 }
 
 export const set = <T>(node: KVNode<T>, hash: number, key: KVKey, value: T): KVNode<T> => {
-  const positionBitmap: Bitmap = 1 << maskHash(hash, node.level)
+  const positionBitmap: Bitmap = maskHash(hash, node.level)
 
   const { subnodes, nodeMap } = node
   const nodeBit = getBitOnBitmap(nodeMap, positionBitmap)
