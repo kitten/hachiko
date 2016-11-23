@@ -61,8 +61,8 @@ describe('KVNode', () => {
         content: [],
         subnodes: [{
           content: [
-            [1, '1'],
-            [33, '1']
+            [0, '0'],
+            [32, '0']
           ],
           subnodes: [],
           dataMap: 3,
@@ -71,8 +71,8 @@ describe('KVNode', () => {
           size: 2
         }, {
           content: [
-            [0, '0'],
-            [32, '0']
+            [1, '1'],
+            [33, '1']
           ],
           subnodes: [],
           dataMap: 3,

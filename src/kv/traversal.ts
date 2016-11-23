@@ -104,7 +104,7 @@ const addNodeEntry = <T>(
   const content = node.content.slice()
   content.splice(dataIndex, 1)
 
-  const nodeIndex = content.length - indexBitOnBitmap(nodeMap, positionBitmap)
+  const nodeIndex = indexBitOnBitmap(nodeMap, positionBitmap)
   const subnodes = node.subnodes.slice()
   subnodes.splice(nodeIndex, 0, subNode)
 
