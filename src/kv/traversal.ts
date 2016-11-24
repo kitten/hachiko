@@ -39,14 +39,12 @@ export const get = <T>(node: KVNode<T>, hash: number, key: KVKey): T => {
   if (nodeBit) {
     // prefix lives on a sub-node
     const index = indexBitOnBitmap(nodeMap, positionBitmap)
-
-    if (node.level === OVERFLOW_LEVEL) {
-      const subNode = subnodes[index] as CollisionNode<T>
+    const subNode = subnodes[index]
+    if (subNode instanceof CollisionNode) {
       return subNode.get(key)
     }
 
-    const subNode = subnodes[index] as KVNode<T>
-    return get(subNode, hash, key)
+    return get(subNode as KVNode<T>, hash, key)
   }
 
   // MISS: prefix is unknown on subtree
