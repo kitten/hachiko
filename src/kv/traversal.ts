@@ -134,10 +134,16 @@ export const set = <T>(node: KVNode<T>, hashCode: number, key: KVKey, value: T):
   if (nodeBit) {
     // Set (key, value) on sub-node
     const index = indexBitOnBitmap(nodeMap, positionBitmap)
-    const subNode = subnodes[index] as KVNode<T>
+    const subNode = subnodes[index]
+
+    let _subNode: KVNode<T> | CollisionNode<T>
+    if (subNode instanceof CollisionNode) {
+      _subNode = subNode.set(key, value)
+    } else {
+      _subNode = set(subNode, hashCode, key, value)
+    }
 
     const _subnodes = subnodes.slice()
-    const _subNode = set(subNode, hashCode, key, value)
     _subnodes[index] = _subNode
 
     const diffSize = _subNode.size - subNode.size
