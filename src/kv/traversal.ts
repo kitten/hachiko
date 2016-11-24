@@ -75,10 +75,11 @@ const addDataEntry = <T>(
 
 const createSubNode = <T>(
   level: number,
+  hashCode: number,
   key: KVKey,
   value: T
 ): KVNode<T> => {
-  const dataMap = maskHash(hash(key), level)
+  const dataMap = maskHash(hashCode, level)
   const nodeMap = 0
   const subnodes: KVNode<T>[] = []
   const size = 1
@@ -186,8 +187,9 @@ export const set = <T>(node: KVNode<T>, hashCode: number, key: KVKey, value: T):
       // We overflowed the 32-bit hash, so we need to create a CollisionNode
       subNode = new CollisionNode<T>(hashCode, [tuple, [key, value]])
     } else {
+      const _hashCode = hash(_key)
       subNode = set(
-        createSubNode(nextLevel, _key, _value),
+        createSubNode(nextLevel, _hashCode, _key, _value),
         hashCode,
         key,
         value
