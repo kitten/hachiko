@@ -2,11 +2,14 @@ import { KVTuple, KVKey } from './constants'
 
 class CollisionNode<T> {
   public content: KVTuple<T>[]
+  public hash: number
   public size: number
 
   public constructor(
+    hash: number,
     content?: KVTuple<T>[]
   ) {
+    this.hash = hash
     this.content = content || []
     this.size = this.content.length
     return this
@@ -30,10 +33,8 @@ class CollisionNode<T> {
   public set(key: KVKey, value: T): CollisionNode<T> {
     const _content = this.content.concat([ key, value ])
 
-    return new CollisionNode<T>(_content)
+    return new CollisionNode<T>(this.hash, _content)
   }
-
-
 }
 
 export default CollisionNode

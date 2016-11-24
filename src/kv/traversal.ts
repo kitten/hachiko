@@ -184,7 +184,7 @@ export const set = <T>(node: KVNode<T>, hash: number, key: KVKey, value: T): KVN
     let subNode: KVNode<T> | CollisionNode<T>
     if (nextLevel === OVERFLOW_LEVEL) {
       // We overflowed the 32-bit hash, so we need to create a CollisionNode
-      subNode = new CollisionNode<T>([tuple, [key, value]])
+      subNode = new CollisionNode<T>(hash, [tuple, [key, value]])
     } else {
       subNode = set(
         createSubNode(node.level + 1, _key, _value),
