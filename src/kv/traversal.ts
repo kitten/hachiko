@@ -14,8 +14,8 @@ import CollisionNode from './collision-node'
 import { KVTuple, KVKey } from './constants'
 import { OVERFLOW_LEVEL } from '../constants'
 
-export const get = <T>(node: KVNode<T>, hash: number, key: KVKey): T => {
-  const positionBitmap: Bitmap = maskHash(hash, node.level)
+export const get = <T>(node: KVNode<T>, hashCode: number, key: KVKey): T => {
+  const positionBitmap: Bitmap = maskHash(hashCode, node.level)
 
   const { content, dataMap } = node
   const dataBit = getBitOnBitmap(dataMap, positionBitmap)
@@ -44,7 +44,7 @@ export const get = <T>(node: KVNode<T>, hash: number, key: KVKey): T => {
       return subNode.get(key)
     }
 
-    return get(subNode as KVNode<T>, hash, key)
+    return get(subNode as KVNode<T>, hashCode, key)
   }
 
   // MISS: prefix is unknown on subtree
@@ -123,8 +123,8 @@ const addNodeEntry = <T>(
   )
 }
 
-export const set = <T>(node: KVNode<T>, hash: number, key: KVKey, value: T): KVNode<T> => {
-  const positionBitmap: Bitmap = maskHash(hash, node.level)
+export const set = <T>(node: KVNode<T>, hashCode: number, key: KVKey, value: T): KVNode<T> => {
+  const positionBitmap: Bitmap = maskHash(hashCode, node.level)
 
   const { subnodes, nodeMap } = node
   const nodeBit = getBitOnBitmap(nodeMap, positionBitmap)
@@ -136,7 +136,7 @@ export const set = <T>(node: KVNode<T>, hash: number, key: KVKey, value: T): KVN
     const subNode = subnodes[index] as KVNode<T>
 
     const _subnodes = subnodes.slice()
-    const _subNode = set(subNode, hash, key, value)
+    const _subNode = set(subNode, hashCode, key, value)
     _subnodes[index] = _subNode
 
     const diffSize = _subNode.size - subNode.size
@@ -184,11 +184,11 @@ export const set = <T>(node: KVNode<T>, hash: number, key: KVKey, value: T): KVN
     let subNode: KVNode<T> | CollisionNode<T>
     if (nextLevel === OVERFLOW_LEVEL) {
       // We overflowed the 32-bit hash, so we need to create a CollisionNode
-      subNode = new CollisionNode<T>(hash, [tuple, [key, value]])
+      subNode = new CollisionNode<T>(hashCode, [tuple, [key, value]])
     } else {
       subNode = set(
-        createSubNode(node.level + 1, _key, _value),
-        hash,
+        createSubNode(nextLevel, _key, _value),
+        hashCode,
         key,
         value
       )
