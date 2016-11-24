@@ -10,7 +10,9 @@ import {
 import hash from '../util/hash'
 
 import KVNode from './node'
+import CollisionNode from './collision-node'
 import { KVTuple, KVKey } from './constants'
+import { OVERFLOW_LEVEL } from '../constants'
 
 export const get = <T>(node: KVNode<T>, hash: number, key: KVKey): T => {
   const positionBitmap: Bitmap = maskHash(hash, node.level)
@@ -37,8 +39,13 @@ export const get = <T>(node: KVNode<T>, hash: number, key: KVKey): T => {
   if (nodeBit) {
     // prefix lives on a sub-node
     const index = indexBitOnBitmap(nodeMap, positionBitmap)
-    const subNode = subnodes[index] as KVNode<T>
 
+    if (node.level === OVERFLOW_LEVEL) {
+      const subNode = subnodes[index] as CollisionNode<T>
+      return subNode.get(key)
+    }
+
+    const subNode = subnodes[index] as KVNode<T>
     return get(subNode, hash, key)
   }
 
@@ -95,7 +102,7 @@ const createSubNode = <T>(
 const addNodeEntry = <T>(
   node: KVNode<T>,
   positionBitmap: Bitmap,
-  subNode: KVNode<T>
+  subNode: (KVNode<T> | CollisionNode<T>)
 ): KVNode<T> => {
   const nodeMap = setBitOnBitmap(node.nodeMap, positionBitmap)
   const dataIndex = indexBitOnBitmap(node.dataMap, positionBitmap)
@@ -171,15 +178,23 @@ export const set = <T>(node: KVNode<T>, hash: number, key: KVKey, value: T): KVN
     }
 
     const _value = tuple[1] as T
+    const nextLevel = node.level + 1
 
     // Create subnode from collision (_key, _value) and set (key, value) on it
     // Thus following collisions will be resolved recursively
-    const subNode = set(
-      createSubNode(node.level + 1, _key, _value),
-      hash,
-      key,
-      value
-    )
+
+    let subNode: KVNode<T> | CollisionNode<T>
+    if (nextLevel === OVERFLOW_LEVEL) {
+      // We overflowed the 32-bit hash, so we need to create a CollisionNode
+      subNode = new CollisionNode<T>([tuple, [key, value]])
+    } else {
+      subNode = set(
+        createSubNode(node.level + 1, _key, _value),
+        hash,
+        key,
+        value
+      )
+    }
 
     // Add new subnode to the current node
     return addNodeEntry(node, positionBitmap, subNode)

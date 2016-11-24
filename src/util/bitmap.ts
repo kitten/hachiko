@@ -1,6 +1,4 @@
-const SIZE = 5
-const BUCKET_SIZE = Math.pow(2, SIZE) // 32
-const MASK = BUCKET_SIZE - 1
+import { SIZE, MASK } from '../constants'
 
 export type Bitmap = number
 export type Mask = number

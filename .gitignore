@@ -5,6 +5,7 @@ lib/
 es/
 dist/
 npm-debug.log
+coverage/
 _book/
 ./*.js
 

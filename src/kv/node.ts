@@ -2,18 +2,19 @@ import hash from '../util/hash'
 import { Bitmap } from '../util/bitmap'
 import { KVTuple, KVKey } from './constants'
 import { get, set } from './traversal'
+import CollisionNode from './collision-node'
 
 class KVNode<T> {
   public level: number
   public content: KVTuple<T>[]
-  public subnodes: KVNode<T>[]
+  public subnodes: (KVNode<T> | CollisionNode<T>)[]
   public dataMap: Bitmap
   public nodeMap: Bitmap
   public size: number
 
   public constructor(
     content?: KVTuple<T>[],
-    subnodes?: KVNode<T>[],
+    subnodes?: (KVNode<T> | CollisionNode<T>)[],
     dataMap?: number,
     nodeMap?: number,
     level?: number,
