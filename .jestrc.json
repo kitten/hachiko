@@ -1,5 +1,5 @@
 {
-  "verbose": true,
+  "testEnvironment": "node",
   "transform": {
     ".ts": "<rootDir>/scripts/jest-preprocessor.js"
   },
