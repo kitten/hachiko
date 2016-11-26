@@ -7,7 +7,7 @@ import {
 } from '../util/bitmap'
 
 export default class BitmapIndexedNode<T> {
-  level: number
+  level: number // NOTE: This should be the parent's level plus one
   size: number
   bitmap: number
   content: Node<T>[]
