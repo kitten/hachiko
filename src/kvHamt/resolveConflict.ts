@@ -6,6 +6,7 @@ import {
   combineBitmaps
 } from '../util/bitmap'
 
+// Branches into two sub-nodes (aNode, bNode) at aNode
 export default function resolveConflict<T>(
   level: number,
   aHashCode: number,
@@ -21,9 +22,11 @@ export default function resolveConflict<T>(
     aNode.level = nextLevel
     bNode.level = nextLevel
 
+    const aSubPositionBitmap = maskHash(aHashCode, nextLevel)
+    const bSubPositionBitmap = maskHash(bHashCode, nextLevel)
     const content: Node<T>[] = []
 
-    if (aPositionBitmap < bPositionBitmap) {
+    if (aSubPositionBitmap < bSubPositionBitmap) {
       content[0] = aNode
       content[1] = bNode
     } else {
@@ -34,7 +37,7 @@ export default function resolveConflict<T>(
     return new BitmapIndexedNode<T>(
       level,
       2,
-      combineBitmaps(aPositionBitmap, bPositionBitmap),
+      combineBitmaps(aSubPositionBitmap, bSubPositionBitmap),
       content
     )
   }
