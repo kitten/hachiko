@@ -36,15 +36,14 @@ export default class ValueNode<T> {
     }
 
     if (hashCode === this.hashCode) {
-      const content: KVTuple<T>[] = [
-        [ this.key, this.value ],
-        [ key, value ]
-      ]
+      const keys: KVKey[] = [ this.key, key ]
+      const values: T[] = [ this.value, value ]
 
       return new CollisionNode(
         this.level,
         this.hashCode,
-        content
+        keys,
+        values
       )
     }
 

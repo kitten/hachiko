@@ -2,28 +2,27 @@ import CollisionNode from '../CollisionNode'
 import ValueNode from '../ValueNode'
 import BitmapIndexedNode from '../BitmapIndexedNode'
 
-import { KVTuple } from '../common'
+import { KVKey } from '../common'
 import { maskHash, indexBitOnBitmap } from '../../util/bitmap'
 
 describe('CollisionNode', () => {
-  const content: KVTuple<number>[] = [
-    [1, 2],
-    [3, 4]
-  ]
+  const keys: KVKey[] = [ 1, 3 ]
+  const values: number[] = [ 2, 4 ]
 
   describe('constructor', () => {
     it('creates an instance correctly', () => {
-      const node = new CollisionNode<number>(1, 2, content)
+      const node = new CollisionNode<number>(1, 2, keys, values)
 
       expect(node.level).toBe(1)
       expect(node.hashCode).toBe(2)
-      expect(node.content).toBe(content)
-      expect(node.size).toBe(content.length)
+      expect(node.keys).toBe(keys)
+      expect(node.values).toBe(values)
+      expect(node.size).toBe(keys.length)
     })
   })
 
   describe('get', () => {
-    const node = new CollisionNode<number>(0, 1, content)
+    const node = new CollisionNode<number>(0, 1, keys, values)
 
     it('should return the value when keys match', () => {
       expect(node.get(1, 1)).toBe(2)
@@ -40,7 +39,7 @@ describe('CollisionNode', () => {
 
   describe('set', () => {
     const hashCode = 0x11111
-    const node = new CollisionNode<number>(0, hashCode, content)
+    const node = new CollisionNode<number>(0, hashCode, keys, values)
 
     it('should add tuple to CollectionNode when hashCodes match', () => {
       const newKey = 0x22222
@@ -48,9 +47,9 @@ describe('CollisionNode', () => {
       const result = node.set(hashCode, newKey, newValue) as CollisionNode<number>
 
       expect(result).toBeInstanceOf(CollisionNode)
-      expect(result.content.length).toBe(content.length + 1)
-      expect(result.content[2][0]).toBe(newKey)
-      expect(result.content[2][1]).toBe(newValue)
+      expect(result.keys.length).toBe(keys.length + 1)
+      expect(result.keys[2]).toBe(newKey)
+      expect(result.values[2]).toBe(newValue)
     })
 
     it('should overwrite tuple on CollectionNode when hashCodes and keys match', () => {
@@ -59,9 +58,9 @@ describe('CollisionNode', () => {
       const result = node.set(hashCode, key, newValue) as CollisionNode<number>
 
       expect(result).toBeInstanceOf(CollisionNode)
-      expect(result.size).toBe(content.length)
-      expect(result.content[0][0]).toBe(key)
-      expect(result.content[0][1]).toBe(newValue)
+      expect(result.size).toBe(keys.length)
+      expect(result.keys[0]).toBe(key)
+      expect(result.values[0]).toBe(newValue)
     })
 
     it('branches off if hashCodes don\'t match up', () => {
@@ -76,7 +75,8 @@ describe('CollisionNode', () => {
 
       const aNode = result.content[0] as CollisionNode<number>
       expect(aNode).toBeInstanceOf(CollisionNode)
-      expect(aNode.content).toBe(content)
+      expect(aNode.keys).toBe(keys)
+      expect(aNode.values).toBe(values)
       expect(aNode.hashCode).toBe(hashCode)
 
       const bNode = result.content[1] as ValueNode<number>

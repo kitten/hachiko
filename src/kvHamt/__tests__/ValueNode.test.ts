@@ -56,10 +56,8 @@ describe('ValueNode', () => {
 
       expect(result).toBeInstanceOf(CollisionNode)
       expect(result.size).toBe(2)
-      expect(result.content).toEqual([
-        [ key, value ],
-        [ newKey, newValue ]
-      ])
+      expect(result.keys).toEqual([ key, newKey ])
+      expect(result.values).toEqual([ value, newValue ])
     })
 
     // This happens when the current node is too "unspecific" for the new key, value
