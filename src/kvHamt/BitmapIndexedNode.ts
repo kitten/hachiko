@@ -28,6 +28,7 @@ export default class BitmapIndexedNode<T> {
     }
 
     const node = this.content[indexBitOnBitmap(this.bitmap, positionBitmap)]
+
     return node.get(hashCode, key, notSetVal)
   }
 
@@ -48,7 +49,7 @@ export default class BitmapIndexedNode<T> {
       sizeDiff = 1
 
       const node = new ValueNode(
-        this.level + 1,
+        this.level,
         hashCode,
         key,
         value

@@ -11,18 +11,16 @@ export default function resolveConflict<T>(
   bNode: Node<T>
 ): Node<T> {
   const nextLevel = level + 1
-  const aPositionBitmap = maskHash(aHashCode, level)
-  const bPositionBitmap = maskHash(bHashCode, level)
+  const aPositionBitmap = maskHash(aHashCode, nextLevel)
+  const bPositionBitmap = maskHash(bHashCode, nextLevel)
 
   if (aPositionBitmap !== bPositionBitmap) {
     aNode.level = nextLevel
     bNode.level = nextLevel
 
-    const aSubPositionBitmap = maskHash(aHashCode, nextLevel)
-    const bSubPositionBitmap = maskHash(bHashCode, nextLevel)
     const content: Node<T>[] = []
 
-    if (aSubPositionBitmap < bSubPositionBitmap) {
+    if (aPositionBitmap < bPositionBitmap) {
       content[0] = aNode
       content[1] = bNode
     } else {
@@ -31,9 +29,9 @@ export default function resolveConflict<T>(
     }
 
     return new BitmapIndexedNode<T>(
-      level,
+      nextLevel,
       aNode.size + bNode.size,
-      aSubPositionBitmap | bSubPositionBitmap,
+      aPositionBitmap | bPositionBitmap,
       content
     )
   }
@@ -49,7 +47,7 @@ export default function resolveConflict<T>(
   )
 
   return new BitmapIndexedNode<T>(
-    level,
+    nextLevel,
     subNode.size,
     aPositionBitmap,
     [ subNode ]

@@ -34,4 +34,31 @@ describe('BitmapIndexedNode', () => {
       expect(node.get(16, 16, notSetVal)).toBe(notSetVal)
     })
   })
+
+  describe('set', () => {
+    const node = new BitmapIndexedNode<number>(0, content.length, bitmap, content)
+
+    it('should set new entries as ValueNodes on content array', () => {
+      const newKey = 3
+      const newValue = 111
+      const result = node.set(newKey, newKey, newValue) as BitmapIndexedNode<number>
+
+      expect(result.size).toBe(content.length + 1)
+      expect(result.bitmap).toBe(14)
+      expect(result.get(newKey, newKey)).toBe(newValue)
+      expect(result.content[2]).toBeInstanceOf(ValueNode)
+    })
+
+    it('should call set on node when new entry\'s hash-fragment collides', () => {
+      const newKey = 2 + 32
+      const newValue = 123
+      const result = node.set(newKey, newKey, newValue) as BitmapIndexedNode<number>
+
+      expect(result.size).toBe(content.length + 1)
+      expect(result.bitmap).toBe(6)
+      expect(result.get(newKey, newKey)).toBe(newValue)
+      expect(result.get(2, 2)).toBe(42)
+      expect(result.content[1]).toBeInstanceOf(BitmapIndexedNode)
+    })
+  })
 })

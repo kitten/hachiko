@@ -3,7 +3,7 @@ import CollisionNode from './CollisionNode'
 import resolveConflict from './resolveConflict'
 
 export default class ValueNode<T> {
-  level: number
+  level: number // NOTE: This should be the same as the parent's level
   size: number
   hashCode: number
   key: KVKey
