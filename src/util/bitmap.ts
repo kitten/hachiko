@@ -22,13 +22,12 @@ export const unsetBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): Bitmap
   bitmap ^ positionBitmap
 )
 
-// NOTE: This should only be used to check truthiness
-export const getBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): number => (
-  (bitmap & positionBitmap)
-)
-
 export const maskHash = (hash: number, level: number): Mask => (
   1 << ((hash >>> (level * SIZE)) & MASK)
+)
+
+export const combineBitmaps = (bitmapA: Bitmap, bitmapB: Bitmap): Bitmap => (
+  bitmapA & bitmapB
 )
 
 export const indexBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): number => (
