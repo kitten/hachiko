@@ -1,10 +1,6 @@
 import { Node } from './common'
 import BitmapIndexedNode from './BitmapIndexedNode'
-
-import {
-  maskHash,
-  combineBitmaps
-} from '../util/bitmap'
+import { maskHash } from '../util/bitmap'
 
 // Branches into two sub-nodes (aNode, bNode) at aNode
 export default function resolveConflict<T>(
@@ -37,7 +33,7 @@ export default function resolveConflict<T>(
     return new BitmapIndexedNode<T>(
       level,
       2,
-      combineBitmaps(aSubPositionBitmap, bSubPositionBitmap),
+      aSubPositionBitmap | bSubPositionBitmap,
       content
     )
   }

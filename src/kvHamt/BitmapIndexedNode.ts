@@ -3,8 +3,6 @@ import ValueNode from './ValueNode'
 
 import {
   maskHash,
-  combineBitmaps,
-  setBitOnBitmap,
   indexBitOnBitmap
 } from '../util/bitmap'
 
@@ -23,7 +21,7 @@ export default class BitmapIndexedNode<T> {
 
   get(hashCode: number, key: KVKey, notSetVal?: T): T {
     const positionBitmap = maskHash(hashCode, this.level)
-    const hasContent = combineBitmaps(this.bitmap, positionBitmap)
+    const hasContent = this.bitmap & positionBitmap
 
     if (!hasContent) {
       return notSetVal
@@ -36,7 +34,7 @@ export default class BitmapIndexedNode<T> {
   set(hashCode: number, key: KVKey, value: T): Node<T> {
     const positionBitmap = maskHash(hashCode, this.level)
 
-    const hasContent = combineBitmaps(this.bitmap, positionBitmap)
+    const hasContent = this.bitmap & positionBitmap
     const contentIndex = indexBitOnBitmap(this.bitmap, positionBitmap)
 
     // New attributes
@@ -46,7 +44,7 @@ export default class BitmapIndexedNode<T> {
 
     if (!hasContent) {
       // Bitmap needs to be updated
-      bitmap = setBitOnBitmap(this.bitmap, positionBitmap)
+      bitmap = this.bitmap | positionBitmap
       sizeDiff = 1
 
       const node = new ValueNode(

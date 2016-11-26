@@ -14,23 +14,10 @@ const hammingWeight = (x: number): number => {
   return x & 0x7f
 }
 
-export const setBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): Bitmap => (
-  bitmap | positionBitmap
-)
-
-export const unsetBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): Bitmap => (
-  bitmap ^ positionBitmap
-)
-
 export const maskHash = (hash: number, level: number): Mask => (
   1 << ((hash >>> (level * SIZE)) & MASK)
-)
-
-export const combineBitmaps = (bitmapA: Bitmap, bitmapB: Bitmap): Bitmap => (
-  bitmapA & bitmapB
 )
 
 export const indexBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): number => (
   hammingWeight(bitmap & (positionBitmap - 1))
 )
-
