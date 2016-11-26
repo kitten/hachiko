@@ -1,4 +1,5 @@
 import { Node, KVKey } from './common'
+import { copyArray } from '../util/array'
 import ValueNode from './ValueNode'
 
 import {
@@ -39,7 +40,7 @@ export default class BitmapIndexedNode<T> {
     const contentIndex = indexBitOnBitmap(this.bitmap, positionBitmap)
 
     // New attributes
-    const content = this.content.slice()
+    const content = copyArray(this.content)
     let bitmap: number
     let sizeDiff: number
 

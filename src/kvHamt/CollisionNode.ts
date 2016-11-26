@@ -1,4 +1,5 @@
 import { Node, KVKey } from './common'
+import { copyArray } from '../util/array'
 import ValueNode from './ValueNode'
 import resolveConflict from './resolveConflict'
 
@@ -52,8 +53,8 @@ export default class CollisionNode<T> {
       }
     }
 
-    const keys = this.keys.slice()
-    const values = this.values.slice()
+    const keys = copyArray(this.keys)
+    const values = copyArray(this.values)
 
     keys[index] = key
     values[index] = value
