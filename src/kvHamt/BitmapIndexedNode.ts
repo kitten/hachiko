@@ -32,7 +32,7 @@ export default class BitmapIndexedNode<T> {
     return node.get(hashCode, key, notSetVal)
   }
 
-  set(hashCode: number, key: KVKey, value: T): Node<T> {
+  set(hashCode: number, key: KVKey, value: T): BitmapIndexedNode<T> {
     const positionBitmap = maskHash(hashCode, this.level)
 
     const hasContent = this.bitmap & positionBitmap
