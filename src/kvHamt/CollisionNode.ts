@@ -53,8 +53,8 @@ export default class CollisionNode<T> {
       }
     }
 
-    const keys = copyArray(this.keys)
-    const values = copyArray(this.values)
+    const keys = copyArray<KVKey>(this.keys)
+    const values = copyArray<T>(this.values)
 
     keys[index] = key
     values[index] = value
