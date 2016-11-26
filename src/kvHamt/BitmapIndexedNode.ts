@@ -10,11 +10,13 @@ import {
 
 export default class BitmapIndexedNode<T> {
   level: number
+  size: number
   bitmap: number
   content: Node<T>[]
 
-  constructor(level: number, bitmap: number, content: Node<T>[]) {
+  constructor(level: number, size: number, bitmap: number, content: Node<T>[]) {
     this.level = level
+    this.size = size
     this.bitmap = bitmap
     this.content = content
   }
@@ -40,10 +42,12 @@ export default class BitmapIndexedNode<T> {
     // New attributes
     const content = this.content.slice()
     let bitmap: number
+    let sizeDiff: number
 
     if (!hasContent) {
       // Bitmap needs to be updated
       bitmap = setBitOnBitmap(this.bitmap, positionBitmap)
+      sizeDiff = 1
 
       const node = new ValueNode(
         this.level + 1,
@@ -57,9 +61,9 @@ export default class BitmapIndexedNode<T> {
     } else {
       bitmap = this.bitmap
 
-      const node = this
-        .content[contentIndex]
-        .set(hashCode, key, value)
+      const oldNode = this.content[contentIndex]
+      const node = oldNode.set(hashCode, key, value)
+      sizeDiff = node.size - oldNode.size
 
       // Update node at index
       content[contentIndex] = node
@@ -67,6 +71,7 @@ export default class BitmapIndexedNode<T> {
 
     return new BitmapIndexedNode<T>(
       this.level,
+      this.size + sizeDiff,
       bitmap,
       content
     )

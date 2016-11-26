@@ -4,12 +4,14 @@ import resolveConflict from './resolveConflict'
 
 export default class ValueNode<T> {
   level: number
+  size: number
   hashCode: number
   key: KVKey
   value: T
 
   constructor(level: number, hashCode: number, key: KVKey, value: T) {
     this.level = level
+    this.size = 1
     this.hashCode = hashCode
     this.key = key
     this.value = value
@@ -49,9 +51,18 @@ export default class ValueNode<T> {
     return resolveConflict<T>(
       this.level,
       this.hashCode,
-      new ValueNode<T>(0, this.hashCode, this.key, this.value),
+      this.clone(),
       hashCode,
       new ValueNode<T>(0, hashCode, key, value)
+    )
+  }
+
+  private clone(): ValueNode<T> {
+    return new ValueNode<T>(
+      this.level,
+      this.hashCode,
+      this.key,
+      this.value
     )
   }
 }

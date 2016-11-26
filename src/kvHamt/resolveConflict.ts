@@ -1,5 +1,4 @@
-import { Node, KVKey } from './common'
-import ValueNode from './ValueNode'
+import { Node } from './common'
 import BitmapIndexedNode from './BitmapIndexedNode'
 
 import {
@@ -34,6 +33,7 @@ export default function resolveConflict<T>(
 
     return new BitmapIndexedNode<T>(
       level,
+      2,
       combineBitmaps(aPositionBitmap, bPositionBitmap),
       content
     )
@@ -51,6 +51,7 @@ export default function resolveConflict<T>(
 
   return new BitmapIndexedNode<T>(
     level,
+    1,
     aPositionBitmap,
     [ subNode ]
   )

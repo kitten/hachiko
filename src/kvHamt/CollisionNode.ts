@@ -6,11 +6,13 @@ export default class CollisionNode<T> {
   level: number
   hashCode: number
   content: KVTuple<T>[]
+  size: number
 
   constructor(level: number, hashCode: number, content: KVTuple<T>[]) {
     this.level = level
     this.hashCode = hashCode
     this.content = content
+    this.size = content.length
   }
 
   get(hashCode: number, key: KVKey, notSetVal?: T): T {
