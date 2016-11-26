@@ -23,7 +23,7 @@ wordArr.forEach(function (key) {
 })
 
 suite
-  .add('Hachiko#KVNode#get', function () {
+  .add('Hachiko#Map#get', function () {
     wordArr.forEach(function (key) {
       hachiko.get(key, key)
     })
