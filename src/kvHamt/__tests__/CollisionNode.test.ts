@@ -1,7 +1,8 @@
-import { KVTuple } from './common'
 import CollisionNode from '../CollisionNode'
 import ValueNode from '../ValueNode'
 import BitmapIndexedNode from '../BitmapIndexedNode'
+
+import { KVTuple } from '../common'
 import { maskHash, indexBitOnBitmap } from '../../util/bitmap'
 
 describe('CollisionNode', () => {
@@ -82,6 +83,12 @@ describe('CollisionNode', () => {
       expect(bNode).toBeInstanceOf(ValueNode)
       expect(bNode.key).toBe(newKey)
       expect(bNode.value).toBe(newValue)
+
+      const aIndex = indexBitOnBitmap(result.bitmap, maskHash(hashCode, 1))
+      expect(aIndex).toBe(0)
+
+      const bIndex = indexBitOnBitmap(result.bitmap, maskHash(newHashCode, 1))
+      expect(bIndex).toBe(1)
     })
   })
 })
