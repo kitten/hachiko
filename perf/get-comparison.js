@@ -1,18 +1,18 @@
 const Benchmark = require('benchmark')
 const wordArr = require('./fixtures/word-arr')
 
-const KVNode = require('../lib/kv/node.js').default
-const Map = require('immutable').Map
+const HachikoMap = require('../lib/Map.js').default
+const ImmutableMap = require('immutable').Map
 const Hamt = require('hamt')
 
 const suite = new Benchmark.Suite()
 
-let hachiko = new KVNode()
+let hachiko = new HachikoMap()
 wordArr.forEach(function (key) {
   hachiko = hachiko.set(key, key)
 })
 
-let immutable = new Map()
+let immutable = new ImmutableMap()
 wordArr.forEach(function (key) {
   immutable = immutable.set(key, key)
 })
