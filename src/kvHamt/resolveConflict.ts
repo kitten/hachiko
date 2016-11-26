@@ -32,7 +32,7 @@ export default function resolveConflict<T>(
 
     return new BitmapIndexedNode<T>(
       level,
-      2,
+      aNode.size + bNode.size,
       aSubPositionBitmap | bSubPositionBitmap,
       content
     )
@@ -50,7 +50,7 @@ export default function resolveConflict<T>(
 
   return new BitmapIndexedNode<T>(
     level,
-    1,
+    subNode.size,
     aPositionBitmap,
     [ subNode ]
   )
