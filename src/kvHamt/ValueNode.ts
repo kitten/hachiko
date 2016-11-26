@@ -1,4 +1,4 @@
-import { Node, KVKey, KVTuple } from './common'
+import { Node, KVKey } from './common'
 import CollisionNode from './CollisionNode'
 import resolveConflict from './resolveConflict'
 
