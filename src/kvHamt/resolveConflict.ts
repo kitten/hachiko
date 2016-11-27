@@ -1,6 +1,6 @@
 import { Node } from './common'
 import BitmapIndexedNode from './BitmapIndexedNode'
-import { maskHash } from '../util/bitmap'
+import { maskHash, indexBitOnBitmap } from '../util/bitmap'
 
 // Branches into two sub-nodes (aNode, bNode) at aNode
 export default function resolveConflict<T>(
@@ -14,42 +14,41 @@ export default function resolveConflict<T>(
   const aPositionBitmap = maskHash(aHashCode, nextLevel)
   const bPositionBitmap = maskHash(bHashCode, nextLevel)
 
-  if (aPositionBitmap !== bPositionBitmap) {
-    aNode.level = nextLevel
-    bNode.level = nextLevel
+  if (aPositionBitmap === bPositionBitmap) {
+    // Resolve deep conflict
 
-    const content: Node<T>[] = []
-
-    if (aPositionBitmap < bPositionBitmap) {
-      content[0] = aNode
-      content[1] = bNode
-    } else {
-      content[0] = bNode
-      content[1] = aNode
-    }
+    const subNode = resolveConflict<T>(
+      nextLevel,
+      aHashCode,
+      aNode,
+      bHashCode,
+      bNode
+    )
 
     return new BitmapIndexedNode<T>(
       nextLevel,
-      aNode.size + bNode.size,
-      aPositionBitmap | bPositionBitmap,
-      content
+      subNode.size,
+      aPositionBitmap,
+      [ subNode ]
     )
   }
 
-  // Resolve deep conflict
+  aNode.level = nextLevel
+  bNode.level = nextLevel
 
-  const subNode = resolveConflict<T>(
-    nextLevel,
-    aHashCode,
-    aNode,
-    bHashCode,
-    bNode
-  )
+  const bitmap = aPositionBitmap | bPositionBitmap
+
+  const content: Node<T>[] = new Array(2)
+  const aIndex = indexBitOnBitmap(bitmap, aPositionBitmap)
+  const bIndex = indexBitOnBitmap(bitmap, bPositionBitmap)
+
+  content[aIndex] = aNode
+  content[bIndex] = bNode
 
   return new BitmapIndexedNode<T>(
     nextLevel,
-    subNode.size,
-    aPositionBitmap,
-    [ subNode ]
+    aNode.size + bNode.size,
+    bitmap,
+    content
   )
 }

@@ -1,11 +1,7 @@
 import { Node, KVKey } from './common'
 import { spliceIn, replaceValue } from '../util/array'
+import { maskHash, indexBitOnBitmap } from '../util/bitmap'
 import ValueNode from './ValueNode'
-
-import {
-  maskHash,
-  indexBitOnBitmap
-} from '../util/bitmap'
 
 export default class BitmapIndexedNode<T> {
   level: number // NOTE: This should be the parent's level plus one
@@ -37,7 +33,6 @@ export default class BitmapIndexedNode<T> {
     const positionBitmap = maskHash(hashCode, this.level)
 
     const hasContent = this.bitmap & positionBitmap
-    const contentIndex = indexBitOnBitmap(this.bitmap, positionBitmap)
 
     if (!hasContent) {
       const node = new ValueNode(
@@ -47,8 +42,9 @@ export default class BitmapIndexedNode<T> {
         value
       )
 
-      const content = spliceIn<Node<T>>(this.content, contentIndex, node)
       const bitmap = this.bitmap | positionBitmap
+      const contentIndex = indexBitOnBitmap(bitmap, positionBitmap)
+      const content = spliceIn<Node<T>>(this.content, contentIndex, node)
 
       return new BitmapIndexedNode<T>(
         this.level,
@@ -57,6 +53,8 @@ export default class BitmapIndexedNode<T> {
         content
       )
     }
+
+    const contentIndex = indexBitOnBitmap(this.bitmap, positionBitmap)
 
     const oldNode = this.content[contentIndex]
     const node = oldNode.set(hashCode, key, value)

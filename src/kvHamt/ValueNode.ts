@@ -1,5 +1,6 @@
 import { Node, KVKey } from './common'
 import CollisionNode from './CollisionNode'
+import BitmapIndexedNode from './BitmapIndexedNode'
 import resolveConflict from './resolveConflict'
 
 export default class ValueNode<T> {
