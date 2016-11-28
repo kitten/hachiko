@@ -4,7 +4,11 @@ import BitmapIndexedNode from './kvHamt/BitmapIndexedNode'
 
 let EMPTY_MAP: Map<any>
 function makeMap<T>(root?: BitmapIndexedNode<T>): Map<T> {
-  if (!root || !root.size) {
+  if (
+    root === undefined ||
+    root === null ||
+    root.size === 0
+  ) {
     if (!EMPTY_MAP) {
       EMPTY_MAP = Object.create(Map.prototype)
       EMPTY_MAP.root = new BitmapIndexedNode(0, 0, 0, [])
