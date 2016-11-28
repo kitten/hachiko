@@ -35,4 +35,9 @@ export default class Map<T> {
   set(key: KVKey, value: T): Map<T> {
     return makeMap(this.root.set(hash(key), key, value))
   }
+
+  delete(key: KVKey): Map<T> {
+    const node = this.root.delete(hash(key), key) as BitmapIndexedNode<T>
+    return makeMap(node)
+  }
 }

@@ -57,6 +57,14 @@ export default class ValueNode<T> {
     )
   }
 
+  delete(hashCode: number, key: KVKey) {
+    if (key === this.key) {
+      return undefined
+    }
+
+    return this
+  }
+
   private clone(): ValueNode<T> {
     return new ValueNode<T>(
       this.level,

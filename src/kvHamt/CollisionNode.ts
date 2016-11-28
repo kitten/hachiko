@@ -1,5 +1,5 @@
 import { Node, KVKey } from './common'
-import { copyArray } from '../util/array'
+import { copyArray, indexOf, spliceOut } from '../util/array'
 import ValueNode from './ValueNode'
 import resolveConflict from './resolveConflict'
 
@@ -64,6 +64,33 @@ export default class CollisionNode<T> {
       this.hashCode,
       keys,
       values
+    )
+  }
+
+  delete(hashCode: number, key: KVKey): Node<T> {
+    const index = indexOf<KVKey>(this.keys, key)
+
+    if (index === -1) {
+      return this
+    }
+
+    const length = this.keys.length
+    if (length === 1) {
+      return undefined
+    } else if (length === 2) {
+      return new ValueNode<T>(
+        this.level,
+        this.hashCode,
+        this.keys[index],
+        this.values[index]
+      )
+    }
+
+    return new CollisionNode<T>(
+      this.level,
+      this.hashCode,
+      spliceOut<KVKey>(this.keys, index),
+      spliceOut<T>(this.values, index)
     )
   }
 
