@@ -89,7 +89,7 @@ export default class BitmapIndexedNode<T> {
       } else if (
         this.content.length === 2 &&
         this.level !== 0 &&
-        !(node instanceof BitmapIndexedNode)
+        node.constructor !== BitmapIndexedNode
       ) {
         return node
       }
