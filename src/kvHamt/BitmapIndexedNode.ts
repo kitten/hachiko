@@ -83,7 +83,15 @@ export default class BitmapIndexedNode<T> {
     const node: Node<T> = oldNode.delete(hashCode, key)
     if (node === oldNode) {
       return this
-    } else if (node === undefined) {
+    }
+
+    let size: number
+    let content: Node<T>[]
+
+    if (node === undefined) {
+      size = this.size - oldNode.size
+      content = spliceOut<Node<T>>(this.content, contentIndex)
+    } else {
       if (this.content.length === 1) {
         return undefined
       } else if (
@@ -94,20 +102,10 @@ export default class BitmapIndexedNode<T> {
         return node
       }
 
-      const size: number = this.size - oldNode.size
-      const content = spliceOut<Node<T>>(this.content, contentIndex)
-      const bitmap = this.bitmap ^ positionBitmap
-
-      return new BitmapIndexedNode<T>(
-        this.level,
-        size,
-        bitmap,
-        content
-      )
+      size = this.size + node.size - oldNode.size
+      content = replaceValue<Node<T>>(this.content, contentIndex, node)
     }
 
-    const size: number = this.size + node.size - oldNode.size
-    const content = replaceValue<Node<T>>(this.content, contentIndex, node)
     const bitmap = this.bitmap ^ positionBitmap
 
     return new BitmapIndexedNode<T>(
