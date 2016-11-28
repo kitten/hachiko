@@ -40,7 +40,7 @@ export default function resolveConflict<T>(
 
   const content: Node<T>[] = new Array(2)
   const aIndex = indexBitOnBitmap(bitmap, aPositionBitmap)
-  const bIndex = indexBitOnBitmap(bitmap, bPositionBitmap)
+  const bIndex = 1 - aIndex
 
   content[aIndex] = aNode
   content[bIndex] = bNode
