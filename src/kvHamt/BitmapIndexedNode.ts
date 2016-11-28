@@ -72,18 +72,17 @@ export default class BitmapIndexedNode<T> {
     }
 
     const contentIndex = indexBitOnBitmap(this.bitmap, positionBitmap)
-
     const oldNode = this.content[contentIndex]
     const node = oldNode.set(hashCode, key, value, owner)
-
     const size = this.size + node.size - oldNode.size
-    const content = replaceValue(this.content, contentIndex, node)
 
     if (owner && owner === this.owner) {
       this.size = size
-      this.content = content
+      this.content[contentIndex] = node
       return this
     }
+
+    const content = replaceValue(this.content, contentIndex, node)
 
     return new BitmapIndexedNode<T>(
       this.level,

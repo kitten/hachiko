@@ -62,17 +62,16 @@ export default class CollisionNode<T> {
       }
     }
 
-    const keys = copyArray<KVKey>(this.keys)
-    const values = copyArray<T>(this.values)
-
-    keys[index] = key
-    values[index] = value
-
     if (owner && owner === this.owner) {
-      this.keys = keys
-      this.values = values
+      this.keys[index] = key
+      this.values[index] = value
       return this
     }
+
+    const keys = copyArray<KVKey>(this.keys)
+    const values = copyArray<T>(this.values)
+    keys[index] = key
+    values[index] = value
 
     return new CollisionNode<T>(
       this.level,
@@ -139,8 +138,8 @@ export default class CollisionNode<T> {
     return new CollisionNode(
       this.level,
       this.hashCode,
-      this.keys,
-      this.values,
+      copyArray<KVKey>(this.keys),
+      copyArray<T>(this.values),
       owner
     )
   }
