@@ -3,11 +3,14 @@ import hash from './util/hash'
 import BitmapIndexedNode from './kvHamt/BitmapIndexedNode'
 
 let EMPTY_MAP: Map<any>
-function makeMap<T>(root?: BitmapIndexedNode<T>): Map<T> {
+function makeMap<T>(root?: BitmapIndexedNode<T>, forceCreation?: boolean): Map<T> {
   if (
-    root === undefined ||
-    root === null ||
-    root.size === 0
+    !forceCreation &&
+    (
+      root === undefined ||
+      root === null ||
+      root.size === 0
+    )
   ) {
     if (!EMPTY_MAP) {
       EMPTY_MAP = Object.create(Map.prototype)
@@ -21,12 +24,14 @@ function makeMap<T>(root?: BitmapIndexedNode<T>): Map<T> {
   const res = Object.create(Map.prototype)
   res.root = root
   res.size = root.size
+  res.owner = root.owner
   return res
 }
 
 export default class Map<T> {
   root?: BitmapIndexedNode<T>
   size: number
+  owner?: Object
 
   constructor() {
     return makeMap<T>()
@@ -37,15 +42,47 @@ export default class Map<T> {
   }
 
   set(key: KVKey, value: T): Map<T> {
-    return makeMap<T>(this.root.set(hash(key), key, value))
+    const root = this.root.set(hash(key), key, value, this.owner)
+    if (this.owner) {
+      this.root = root
+      this.size = root.size
+      return this
+    }
+
+    return makeMap<T>(root)
   }
 
   delete(key: KVKey): Map<T> {
-    const node = this.root.delete(hash(key), key) as BitmapIndexedNode<T>
-    return makeMap<T>(node)
+    const root = this.root.delete(hash(key), key, this.owner) as BitmapIndexedNode<T>
+    if (this.owner) {
+      this.root = root
+      this.size = root.size
+      return this
+    }
+
+    return makeMap<T>(root)
   }
 
   clear(): Map<T> {
     return makeMap<T>()
+  }
+
+  asMutable(): Map<T> {
+    if (this.owner) {
+      return this
+    }
+
+    const res = makeMap<T>(this.root, true)
+    res.owner = {}
+    return res
+  }
+
+  asImmutable(): Map<T> {
+    if (!this.size) {
+      return makeMap<T>()
+    }
+
+    this.owner = undefined
+    return this
   }
 }

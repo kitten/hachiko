@@ -8,12 +8,20 @@ export default class BitmapIndexedNode<T> {
   size: number
   bitmap: number
   content: Node<T>[]
+  owner?: Object
 
-  constructor(level: number, size: number, bitmap: number, content: Node<T>[]) {
+  constructor(
+    level: number,
+    size: number,
+    bitmap: number,
+    content: Node<T>[],
+    owner?: Object
+  ) {
     this.level = level
     this.size = size
     this.bitmap = bitmap
     this.content = content
+    this.owner = owner
   }
 
   get(hashCode: number, key: KVKey, notSetVal?: T): T {
@@ -29,7 +37,7 @@ export default class BitmapIndexedNode<T> {
     return node.get(hashCode, key, notSetVal)
   }
 
-  set(hashCode: number, key: KVKey, value: T): BitmapIndexedNode<T> {
+  set(hashCode: number, key: KVKey, value: T, owner?: Object): BitmapIndexedNode<T> {
     const positionBitmap = maskHash(hashCode, this.level)
     const hasContent = this.bitmap & positionBitmap
 
@@ -38,38 +46,55 @@ export default class BitmapIndexedNode<T> {
         this.level,
         hashCode,
         key,
-        value
+        value,
+        owner
       )
 
       const bitmap = this.bitmap | positionBitmap
       const contentIndex = indexBitOnBitmap(bitmap, positionBitmap)
       const content = spliceIn<Node<T>>(this.content, contentIndex, node)
+      const size = this.size + 1
+
+      if (owner && owner === this.owner) {
+        this.size = size
+        this.bitmap = bitmap
+        this.content = content
+        return this
+      }
 
       return new BitmapIndexedNode<T>(
         this.level,
-        this.size + 1,
+        size,
         bitmap,
-        content
+        content,
+        owner
       )
     }
 
     const contentIndex = indexBitOnBitmap(this.bitmap, positionBitmap)
 
     const oldNode = this.content[contentIndex]
-    const node = oldNode.set(hashCode, key, value)
+    const node = oldNode.set(hashCode, key, value, owner)
 
     const size = this.size + node.size - oldNode.size
     const content = replaceValue(this.content, contentIndex, node)
+
+    if (owner && owner === this.owner) {
+      this.size = size
+      this.content = content
+      return this
+    }
 
     return new BitmapIndexedNode<T>(
       this.level,
       size,
       this.bitmap,
-      content
+      content,
+      owner
     )
   }
 
-  delete(hashCode: number, key: KVKey): Node<T> {
+  delete(hashCode: number, key: KVKey, owner?: Object): Node<T> {
     const positionBitmap = maskHash(hashCode, this.level)
     const hasContent = this.bitmap & positionBitmap
 
@@ -80,7 +105,7 @@ export default class BitmapIndexedNode<T> {
     const contentIndex = indexBitOnBitmap(this.bitmap, positionBitmap)
     const oldNode = this.content[contentIndex]
 
-    const node: Node<T> = oldNode.delete(hashCode, key)
+    const node: Node<T> = oldNode.delete(hashCode, key, owner)
     if (node === oldNode) {
       return this
     }
@@ -108,11 +133,19 @@ export default class BitmapIndexedNode<T> {
 
     const bitmap = this.bitmap ^ positionBitmap
 
+    if (owner && owner === this.owner) {
+      this.size = size
+      this.bitmap = bitmap
+      this.content = content
+      return this
+    }
+
     return new BitmapIndexedNode<T>(
       this.level,
       size,
       bitmap,
-      content
+      content,
+      owner
     )
   }
 

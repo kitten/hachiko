@@ -9,13 +9,21 @@ export default class CollisionNode<T> {
   keys: KVKey[]
   values: T[]
   size: number
+  owner?: Object
 
-  constructor(level: number, hashCode: number, keys: KVKey[], values: T[]) {
+  constructor(
+    level: number,
+    hashCode: number,
+    keys: KVKey[],
+    values: T[],
+    owner?: Object
+  ) {
     this.level = level
     this.hashCode = hashCode
     this.keys = keys
     this.values = values
     this.size = keys.length
+    this.owner = owner
   }
 
   get(hashCode: number, key: KVKey, notSetVal?: T): T {
@@ -30,17 +38,18 @@ export default class CollisionNode<T> {
     return notSetVal
   }
 
-  set(hashCode: number, key: KVKey, value: T): Node<T> {
+  set(hashCode: number, key: KVKey, value: T, owner?: Object): Node<T> {
     // Resolve different hashCodes by branching off
     if (hashCode !== this.hashCode) {
-      const valueNode = new ValueNode<T>(0, hashCode, key, value)
+      const valueNode = new ValueNode<T>(0, hashCode, key, value, owner)
 
       return resolveConflict<T>(
         this.level,
         this.hashCode,
-        this.clone(),
+        this.clone(owner),
         hashCode,
-        valueNode
+        valueNode,
+        owner
       )
     }
 
@@ -59,15 +68,22 @@ export default class CollisionNode<T> {
     keys[index] = key
     values[index] = value
 
+    if (owner && owner === this.owner) {
+      this.keys = keys
+      this.values = values
+      return this
+    }
+
     return new CollisionNode<T>(
       this.level,
       this.hashCode,
       keys,
-      values
+      values,
+      owner
     )
   }
 
-  delete(hashCode: number, key: KVKey): Node<T> {
+  delete(hashCode: number, key: KVKey, owner?: Object): Node<T> {
     const index = indexOf<KVKey>(this.keys, key)
 
     if (index === -1) {
@@ -82,15 +98,26 @@ export default class CollisionNode<T> {
         this.level,
         this.hashCode,
         this.keys[index],
-        this.values[index]
+        this.values[index],
+        owner
       )
+    }
+
+    const keys = spliceOut<KVKey>(this.keys, index)
+    const values = spliceOut<T>(this.values, index)
+
+    if (owner && owner === this.owner) {
+      this.keys = keys
+      this.values = values
+      return this
     }
 
     return new CollisionNode<T>(
       this.level,
       this.hashCode,
-      spliceOut<KVKey>(this.keys, index),
-      spliceOut<T>(this.values, index)
+      keys,
+      values,
+      owner
     )
   }
 
@@ -108,12 +135,13 @@ export default class CollisionNode<T> {
     return false
   }
 
-  private clone(): CollisionNode<T> {
+  private clone(owner?: Object): CollisionNode<T> {
     return new CollisionNode(
       this.level,
       this.hashCode,
       this.keys,
-      this.values
+      this.values,
+      owner
     )
   }
 }

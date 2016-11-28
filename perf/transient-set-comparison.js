@@ -9,22 +9,20 @@ const suite = new Benchmark.Suite()
 
 suite
   .add('Hachiko#Map#set', function () {
-    let temp = new HachikoMap()
+    let temp = new HachikoMap().asMutable()
     wordArr.forEach(function (key) {
       temp = temp.set(key, key)
     })
+
+    temp = temp.asImmutable()
   })
   .add('Immutable#Map#set', function () {
-    let temp = new ImmutableMap()
+    let temp = new ImmutableMap().asMutable()
     wordArr.forEach(function (key) {
       temp = temp.set(key, key)
     })
-  })
-  .add('HAMT#set', function () {
-    let temp = Hamt.empty
-    wordArr.forEach(function (key) {
-      temp = temp.set(key, key)
-    })
+
+    temp = temp.asImmutable()
   })
   .on('error', function (err) {
     console.error(err)

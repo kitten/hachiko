@@ -8,13 +8,21 @@ export default class ValueNode<T> {
   hashCode: number
   key: KVKey
   value: T
+  owner?: Object
 
-  constructor(level: number, hashCode: number, key: KVKey, value: T) {
+  constructor(
+    level: number,
+    hashCode: number,
+    key: KVKey,
+    value: T,
+    owner?: Object
+  ) {
     this.level = level
     this.size = 1
     this.hashCode = hashCode
     this.key = key
     this.value = value
+    this.owner = owner
   }
 
   get(hashCode: number, key: KVKey, notSetVal?: T): T {
@@ -25,13 +33,19 @@ export default class ValueNode<T> {
     return this.value
   }
 
-  set(hashCode: number, key: KVKey, value: T): Node<T> {
+  set(hashCode: number, key: KVKey, value: T, owner?: Object): Node<T> {
     if (key === this.key) {
+      if (owner && owner === this.owner) {
+        this.value = value
+        return this
+      }
+
       return new ValueNode<T>(
         this.level,
         this.hashCode,
         this.key,
-        value
+        value,
+        owner
       )
     }
 
@@ -43,20 +57,22 @@ export default class ValueNode<T> {
         this.level,
         this.hashCode,
         keys,
-        values
+        values,
+        owner
       )
     }
 
     return resolveConflict<T>(
       this.level,
       this.hashCode,
-      this.clone(),
+      this.clone(owner),
       hashCode,
-      new ValueNode<T>(0, hashCode, key, value)
+      new ValueNode<T>(0, hashCode, key, value, owner),
+      owner
     )
   }
 
-  delete(hashCode: number, key: KVKey) {
+  delete(hashCode: number, key: KVKey, owner?: Object) {
     if (key === this.key) {
       return undefined
     }
@@ -68,12 +84,13 @@ export default class ValueNode<T> {
     return step(this.value, this.key)
   }
 
-  private clone(): ValueNode<T> {
+  private clone(owner?: Object): ValueNode<T> {
     return new ValueNode<T>(
       this.level,
       this.hashCode,
       this.key,
-      this.value
+      this.value,
+      owner
     )
   }
 }
