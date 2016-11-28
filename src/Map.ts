@@ -85,4 +85,10 @@ export default class Map<T> {
     this.owner = undefined
     return this
   }
+
+  withMutations(closure: (x: Map<T>) => void) {
+    let mutable = this.asMutable()
+    closure(mutable)
+    return mutable.asImmutable()
+  }
 }
