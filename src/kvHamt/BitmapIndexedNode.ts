@@ -1,4 +1,4 @@
-import { Node, KVKey } from './common'
+import { Node, KVKey, IteratorStep } from './common'
 import { spliceIn, replaceValue, spliceOut } from '../util/array'
 import { maskHash, indexBitOnBitmap } from '../util/bitmap'
 import ValueNode from './ValueNode'
@@ -114,5 +114,17 @@ export default class BitmapIndexedNode<T> {
       bitmap,
       content
     )
+  }
+
+  iterate(step: IteratorStep<T>) {
+    const length = this.content.length
+    for (let i = 0; i < length; i++) {
+      const node: Node<T> = this.content[i]
+      if (node.iterate(step) === true) {
+        return true
+      }
+    }
+
+    return false
   }
 }

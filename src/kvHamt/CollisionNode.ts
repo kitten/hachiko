@@ -1,4 +1,4 @@
-import { Node, KVKey } from './common'
+import { Node, KVKey, IteratorStep } from './common'
 import { copyArray, indexOf, spliceOut } from '../util/array'
 import ValueNode from './ValueNode'
 import resolveConflict from './resolveConflict'
@@ -92,6 +92,20 @@ export default class CollisionNode<T> {
       spliceOut<KVKey>(this.keys, index),
       spliceOut<T>(this.values, index)
     )
+  }
+
+  iterate(step: IteratorStep<T>) {
+    const length = this.keys.length
+    for (let i = 0; i < length; i++) {
+      const key = this.keys[i]
+      const value = this.values[i]
+
+      if (step(value, key) === true) {
+        return true
+      }
+    }
+
+    return false
   }
 
   private clone(): CollisionNode<T> {

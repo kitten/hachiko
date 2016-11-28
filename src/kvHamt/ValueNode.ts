@@ -1,6 +1,5 @@
-import { Node, KVKey } from './common'
+import { Node, KVKey, IteratorStep } from './common'
 import CollisionNode from './CollisionNode'
-import BitmapIndexedNode from './BitmapIndexedNode'
 import resolveConflict from './resolveConflict'
 
 export default class ValueNode<T> {
@@ -63,6 +62,10 @@ export default class ValueNode<T> {
     }
 
     return this
+  }
+
+  iterate(step: IteratorStep<T>) {
+    return step(this.value, this.key)
   }
 
   private clone(): ValueNode<T> {
