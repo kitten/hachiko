@@ -3,22 +3,22 @@ import hash from './util/hash'
 import BitmapIndexedNode from './kvHamt/BitmapIndexedNode'
 
 let EMPTY_MAP: Map<any>
+function emptyMap<T>(): Map<T> {
+  if (!EMPTY_MAP) {
+    EMPTY_MAP = Object.create(Map.prototype)
+    EMPTY_MAP.root = new BitmapIndexedNode(0, 0, 0, [])
+    EMPTY_MAP.size = 0
+  }
+
+  return EMPTY_MAP as Map<T>
+}
+
 function makeMap<T>(root?: BitmapIndexedNode<T>, forceCreation?: boolean): Map<T> {
   if (
     !forceCreation &&
-    (
-      root === undefined ||
-      root === null ||
-      root.size === 0
-    )
+    (!root || root.size === 0)
   ) {
-    if (!EMPTY_MAP) {
-      EMPTY_MAP = Object.create(Map.prototype)
-      EMPTY_MAP.root = new BitmapIndexedNode(0, 0, 0, [])
-      EMPTY_MAP.size = 0
-    }
-
-    return EMPTY_MAP as Map<T>
+    return emptyMap<T>()
   }
 
   const res = Object.create(Map.prototype)
@@ -79,7 +79,7 @@ export default class Map<T> {
 
   asImmutable(): Map<T> {
     if (!this.size) {
-      return makeMap<T>()
+      return emptyMap<T>()
     }
 
     this.owner = undefined
