@@ -1,4 +1,4 @@
-import { Node, KVKey, IteratorStep } from './common'
+import { Node, KVKey, Predicate } from './common'
 import { copyArray, indexOf, spliceOut } from '../util/array'
 import ValueNode from './ValueNode'
 import resolveConflict from './resolveConflict'
@@ -120,7 +120,7 @@ export default class CollisionNode<T> {
     )
   }
 
-  iterate(step: IteratorStep<T>) {
+  iterate(step: Predicate<T>) {
     const length = this.keys.length
     for (let i = 0; i < length; i++) {
       const key = this.keys[i]

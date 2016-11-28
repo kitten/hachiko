@@ -6,22 +6,26 @@ const ImmutableMap = require('immutable').Map
 
 const suite = new Benchmark.Suite()
 
+let hachiko = new HachikoMap()
+wordArr.forEach(function (key) {
+  hachiko = hachiko.set(key, key)
+})
+
+let immutable = new ImmutableMap()
+wordArr.forEach(function (key) {
+  immutable = immutable.set(key, key)
+})
+
+const predicate = function (value) {
+  return value.length % 2 === 0
+}
+
 suite
-  .add('Hachiko#Map#set', function () {
-    let temp = new HachikoMap().asMutable()
-    wordArr.forEach(function (key) {
-      temp = temp.set(key, key)
-    })
-
-    temp = temp.asImmutable()
+  .add('Hachiko#Map#filter', function () {
+    hachiko.filter(predicate)
   })
-  .add('Immutable#Map#set', function () {
-    let temp = new ImmutableMap().asMutable()
-    wordArr.forEach(function (key) {
-      temp = temp.set(key, key)
-    })
-
-    temp = temp.asImmutable()
+  .add('Immutable#Map#filter', function () {
+    immutable.filter(predicate)
   })
   .on('error', function (err) {
     console.error(err)

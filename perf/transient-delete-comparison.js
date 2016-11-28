@@ -3,7 +3,6 @@ const wordArr = require('./fixtures/word-arr')
 
 const HachikoMap = require('../lib/Map.js').default
 const ImmutableMap = require('immutable').Map
-const Hamt = require('hamt')
 
 const suite = new Benchmark.Suite()
 
@@ -15,11 +14,6 @@ wordArr.forEach(function (key) {
 let immutable = new ImmutableMap()
 wordArr.forEach(function (key) {
   immutable = immutable.set(key, key)
-})
-
-let hamt = Hamt.empty
-wordArr.forEach(function (key) {
-  hamt = hamt.set(key, key)
 })
 
 const toBeDeleted = []

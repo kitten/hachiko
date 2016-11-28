@@ -1,4 +1,4 @@
-import { KVKey } from './kvHamt/common'
+import { KVKey, Predicate } from './kvHamt/common'
 import hash from './util/hash'
 import BitmapIndexedNode from './kvHamt/BitmapIndexedNode'
 
@@ -61,6 +61,20 @@ export default class Map<T> {
     }
 
     return makeMap<T>(root)
+  }
+
+  filter(predicate: Predicate<T>): Map<T> {
+    let mutable = this.owner ? this : this.asMutable()
+
+    this.root.iterate((value: T, key: KVKey) => {
+      if (!predicate(value, key)) {
+        mutable = mutable.delete(key)
+      }
+
+      return false
+    })
+
+    return this.owner ? mutable : mutable.asImmutable()
   }
 
   clear(): Map<T> {

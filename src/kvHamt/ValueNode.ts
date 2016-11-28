@@ -1,4 +1,4 @@
-import { Node, KVKey, IteratorStep } from './common'
+import { Node, KVKey, Predicate } from './common'
 import CollisionNode from './CollisionNode'
 import resolveConflict from './resolveConflict'
 
@@ -80,7 +80,7 @@ export default class ValueNode<T> {
     return this
   }
 
-  iterate(step: IteratorStep<T>) {
+  iterate(step: Predicate<T>) {
     return step(this.value, this.key)
   }
 
