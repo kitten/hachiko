@@ -1,6 +1,6 @@
 import BitmapIndexedNode from '../BitmapIndexedNode'
 import ValueNode from '../ValueNode'
-import { Node } from '../common'
+import Node from '../Node'
 
 describe('BitmapIndexedNode', () => {
   const bitmap = 6

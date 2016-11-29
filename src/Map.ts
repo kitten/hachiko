@@ -1,4 +1,4 @@
-import { KVKey, Predicate } from './kvHamt/common'
+import { KVKey, Predicate } from './constants'
 import hash from './util/hash'
 import BitmapIndexedNode from './kvHamt/BitmapIndexedNode'
 

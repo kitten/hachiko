@@ -2,7 +2,7 @@ import CollisionNode from '../CollisionNode'
 import ValueNode from '../ValueNode'
 import BitmapIndexedNode from '../BitmapIndexedNode'
 
-import { KVKey } from '../common'
+import { KVKey } from '../../constants'
 import { maskHash, indexBitOnBitmap } from '../../util/bitmap'
 
 describe('CollisionNode', () => {

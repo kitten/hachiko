@@ -1,4 +1,5 @@
-import { Node, KVKey, Predicate } from './common'
+import Node from './Node'
+import { KVKey, Predicate } from '../constants'
 import { copyArray, indexOf, spliceOut } from '../util/array'
 import ValueNode from './ValueNode'
 import resolveConflict from './resolveConflict'

@@ -1,4 +1,4 @@
-import { Node } from './common'
+import Node from './Node'
 import BitmapIndexedNode from './BitmapIndexedNode'
 import { maskHash, indexBitOnBitmap } from '../util/bitmap'
 

@@ -1,4 +1,5 @@
-import { Node, KVKey, Predicate } from './common'
+import Node from './Node'
+import { KVKey, Predicate } from '../constants'
 import CollisionNode from './CollisionNode'
 import resolveConflict from './resolveConflict'
 
