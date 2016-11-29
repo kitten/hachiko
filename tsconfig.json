@@ -6,7 +6,8 @@
     "noImplicitThis": true,
     "moduleResolution": "node",
     "pretty": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "declaration": true
   },
   "include": [
     "src/**/*.ts"
