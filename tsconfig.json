@@ -4,6 +4,7 @@
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
+    "strictNullChecks": true,
     "moduleResolution": "node",
     "pretty": true,
     "sourceMap": true,

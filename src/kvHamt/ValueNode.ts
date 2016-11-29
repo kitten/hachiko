@@ -1,5 +1,5 @@
 import Node from './Node'
-import { KVKey, Predicate } from '../constants'
+import { KVKey, Predicate, Option } from '../constants'
 import CollisionNode from './CollisionNode'
 import resolveConflict from './resolveConflict'
 
@@ -26,7 +26,7 @@ export default class ValueNode<T> {
     this.owner = owner
   }
 
-  get(hashCode: number, key: KVKey, notSetVal?: T): T {
+  get(hashCode: number, key: KVKey, notSetVal?: T): Option<T> {
     if (key !== this.key) {
       return notSetVal
     }
@@ -73,7 +73,7 @@ export default class ValueNode<T> {
     )
   }
 
-  delete(hashCode: number, key: KVKey, owner?: Object) {
+  delete(hashCode: number, key: KVKey, owner?: Object): Option<ValueNode<T>> {
     if (key === this.key) {
       return undefined
     }

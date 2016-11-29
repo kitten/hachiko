@@ -1,5 +1,5 @@
 import Node from './Node'
-import { KVKey, Predicate } from '../constants'
+import { KVKey, Predicate, Option } from '../constants'
 import { spliceIn, replaceValue, spliceOut } from '../util/array'
 import { maskHash, indexBitOnBitmap } from '../util/bitmap'
 import ValueNode from './ValueNode'
@@ -25,7 +25,7 @@ export default class BitmapIndexedNode<T> {
     this.owner = owner
   }
 
-  get(hashCode: number, key: KVKey, notSetVal?: T): T {
+  get(hashCode: number, key: KVKey, notSetVal?: T): Option<T> {
     const positionBitmap = maskHash(hashCode, this.level)
     const hasContent = this.bitmap & positionBitmap
 
@@ -94,7 +94,7 @@ export default class BitmapIndexedNode<T> {
     )
   }
 
-  delete(hashCode: number, key: KVKey, owner?: Object): Node<T> {
+  delete(hashCode: number, key: KVKey, owner?: Object): Option<Node<T>> {
     const positionBitmap = maskHash(hashCode, this.level)
     const hasContent = this.bitmap & positionBitmap
 
@@ -105,7 +105,7 @@ export default class BitmapIndexedNode<T> {
     const contentIndex = indexBitOnBitmap(this.bitmap, positionBitmap)
     const oldNode = this.content[contentIndex]
 
-    const node: Node<T> = oldNode.delete(hashCode, key, owner)
+    const node: Option<Node<T>> = oldNode.delete(hashCode, key, owner)
     if (node === oldNode) {
       return this
     }

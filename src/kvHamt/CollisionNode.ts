@@ -1,5 +1,5 @@
 import Node from './Node'
-import { KVKey, Predicate } from '../constants'
+import { KVKey, Predicate, Option } from '../constants'
 import { copyArray, indexOf, spliceOut } from '../util/array'
 import ValueNode from './ValueNode'
 import resolveConflict from './resolveConflict'
@@ -27,7 +27,7 @@ export default class CollisionNode<T> {
     this.owner = owner
   }
 
-  get(hashCode: number, key: KVKey, notSetVal?: T): T {
+  get(hashCode: number, key: KVKey, notSetVal?: T): Option<T> {
     const length = this.keys.length
 
     for (let index = 0; index < length; index++) {
@@ -83,7 +83,7 @@ export default class CollisionNode<T> {
     )
   }
 
-  delete(hashCode: number, key: KVKey, owner?: Object): Node<T> {
+  delete(hashCode: number, key: KVKey, owner?: Object): Option<Node<T>> {
     const index = indexOf<KVKey>(this.keys, key)
 
     if (index === -1) {

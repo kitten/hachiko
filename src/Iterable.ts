@@ -1,4 +1,4 @@
-import { KVKey, Predicate } from './constants'
+import { KVKey, Predicate, Option } from './constants'
 
 abstract class Iterable<T> {
   abstract owner?: Object
@@ -29,7 +29,7 @@ abstract class Iterable<T> {
     return this.owner ? mutable : mutable.asImmutable()
   }
 
-  find(predicate: Predicate<T>, notSetValue?: T): T {
+  find(predicate: Predicate<T>, notSetValue?: T): Option<T> {
     let result = notSetValue
 
     this.__iterate((value: T, key: KVKey) => {

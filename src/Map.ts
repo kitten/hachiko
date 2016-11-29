@@ -1,4 +1,4 @@
-import { KVKey, Predicate } from './constants'
+import { KVKey, Predicate, Option } from './constants'
 import hash from './util/hash'
 import BitmapIndexedNode from './kvHamt/BitmapIndexedNode'
 import Iterable from './Iterable'
@@ -14,10 +14,10 @@ function emptyMap<T>(): Map<T> {
   return EMPTY_MAP as Map<T>
 }
 
-function makeMap<T>(root?: BitmapIndexedNode<T>, forceCreation?: boolean): Map<T> {
+function makeMap<T>(root: BitmapIndexedNode<T>, forceCreation?: boolean): Map<T> {
   if (
     !forceCreation &&
-    (!root || root.size === 0)
+    root.size === 0
   ) {
     return emptyMap<T>()
   }
@@ -30,21 +30,22 @@ function makeMap<T>(root?: BitmapIndexedNode<T>, forceCreation?: boolean): Map<T
 }
 
 export default class Map<T> extends Iterable<T> {
-  root?: BitmapIndexedNode<T>
+  root: BitmapIndexedNode<T>
   size: number
   owner?: Object
 
   constructor() {
     super()
-    return makeMap<T>()
+    return emptyMap<T>()
   }
 
-  get(key: KVKey, notSetVal?: T): T {
+  get(key: KVKey, notSetVal?: T): Option<T> {
     return this.root.get(hash(key), key, notSetVal)
   }
 
   set(key: KVKey, value: T): Map<T> {
     const root = this.root.set(hash(key), key, value, this.owner)
+
     if (this.owner) {
       this.root = root
       this.size = root.size
@@ -66,7 +67,7 @@ export default class Map<T> extends Iterable<T> {
   }
 
   clear(): Map<T> {
-    return makeMap<T>()
+    return emptyMap<T>()
   }
 
   asMutable(): Map<T> {
