@@ -1,6 +1,7 @@
 import { KVKey, Predicate } from './constants'
 import hash from './util/hash'
 import BitmapIndexedNode from './kvHamt/BitmapIndexedNode'
+import Iterable from './Iterable'
 
 let EMPTY_MAP: Map<any>
 function emptyMap<T>(): Map<T> {
@@ -28,12 +29,13 @@ function makeMap<T>(root?: BitmapIndexedNode<T>, forceCreation?: boolean): Map<T
   return res
 }
 
-export default class Map<T> {
+export default class Map<T> extends Iterable<T> {
   root?: BitmapIndexedNode<T>
   size: number
   owner?: Object
 
   constructor() {
+    super()
     return makeMap<T>()
   }
 
@@ -63,20 +65,6 @@ export default class Map<T> {
     return makeMap<T>(root)
   }
 
-  filter(predicate: Predicate<T>): Map<T> {
-    let mutable = this.owner ? this : this.asMutable()
-
-    this.root.iterate((value: T, key: KVKey) => {
-      if (!predicate(value, key)) {
-        mutable = mutable.delete(key)
-      }
-
-      return false
-    })
-
-    return this.owner ? mutable : mutable.asImmutable()
-  }
-
   clear(): Map<T> {
     return makeMap<T>()
   }
@@ -104,5 +92,9 @@ export default class Map<T> {
     let mutable = this.asMutable()
     closure(mutable)
     return mutable.asImmutable()
+  }
+
+  __iterate(step: Predicate<T>) {
+    return this.root.iterate(step)
   }
 }
