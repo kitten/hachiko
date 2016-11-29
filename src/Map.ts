@@ -1,4 +1,4 @@
-import { KVKey, Predicate, Option } from './constants'
+import { KVKey, Predicate, Transform, Option } from './constants'
 import hash from './util/hash'
 import BitmapIndexedNode from './kvHamt/BitmapIndexedNode'
 import Iterable from './Iterable'
@@ -64,6 +64,17 @@ export default class Map<T> extends Iterable<T> {
     }
 
     return makeMap<T>(root)
+  }
+
+  map<G>(transform: Transform<T, G>): Map<G> {
+    const root = this.root.map<G>(transform, this.owner) as BitmapIndexedNode<G>
+    if (this.owner) {
+      const res = (this as Map<any>)
+      res.root = root
+      return (res as Map<G>)
+    }
+
+    return makeMap<G>(root)
   }
 
   clear(): Map<T> {

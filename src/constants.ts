@@ -11,3 +11,7 @@ export interface Predicate<T> {
   (value: T, key: KVKey): boolean
 }
 
+export interface Transform<T, G> {
+  (value: T, key: KVKey): G
+}
+

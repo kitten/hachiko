@@ -1,6 +1,6 @@
 import Node from './Node'
-import { KVKey, Predicate, Option } from '../constants'
-import { spliceIn, replaceValue, spliceOut } from '../util/array'
+import { KVKey, Predicate, Transform, Option } from '../constants'
+import { map, spliceIn, replaceValue, spliceOut } from '../util/array'
 import { maskHash, indexBitOnBitmap } from '../util/bitmap'
 import ValueNode from './ValueNode'
 
@@ -144,6 +144,29 @@ export default class BitmapIndexedNode<T> {
       this.level,
       size,
       bitmap,
+      content,
+      owner
+    )
+  }
+
+  map<G>(transform: Transform<T, G>, owner?: Object): Node<G> {
+    const length = this.content.length
+    const content: Node<G>[] = new Array(length)
+    for (let i = 0; i < length; i++) {
+      const node = this.content[i]
+      content[i] = node.map<G>(transform, owner)
+    }
+
+    if (owner && owner === this.owner) {
+      const res = (this as BitmapIndexedNode<any>)
+      res.content = content
+      return (res as BitmapIndexedNode<G>)
+    }
+
+    return new BitmapIndexedNode<G>(
+      this.level,
+      this.size,
+      this.bitmap,
       content,
       owner
     )

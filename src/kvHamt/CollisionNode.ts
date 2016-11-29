@@ -1,5 +1,5 @@
 import Node from './Node'
-import { KVKey, Predicate, Option } from '../constants'
+import { KVKey, Predicate, Transform, Option } from '../constants'
 import { copyArray, indexOf, spliceOut } from '../util/array'
 import ValueNode from './ValueNode'
 import resolveConflict from './resolveConflict'
@@ -116,6 +116,30 @@ export default class CollisionNode<T> {
       this.level,
       this.hashCode,
       keys,
+      values,
+      owner
+    )
+  }
+
+  map<G>(transform: Transform<T, G>, owner?: Object): Node<G> {
+    const length = this.keys.length
+    const values = new Array(length)
+    for (let i = 0; i < length; i++) {
+      const key = this.keys[i]
+      const value = this.values[i]
+      values[i] = transform(value, key)
+    }
+
+    if (owner && owner === this.owner) {
+      const res = (this as CollisionNode<any>)
+      res.values = values
+      return (res as CollisionNode<G>)
+    }
+
+    return new CollisionNode<G>(
+      this.level,
+      this.hashCode,
+      this.keys,
       values,
       owner
     )

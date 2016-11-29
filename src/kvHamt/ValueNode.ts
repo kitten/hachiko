@@ -1,5 +1,5 @@
 import Node from './Node'
-import { KVKey, Predicate, Option } from '../constants'
+import { KVKey, Predicate, Transform, Option } from '../constants'
 import CollisionNode from './CollisionNode'
 import resolveConflict from './resolveConflict'
 
@@ -79,6 +79,24 @@ export default class ValueNode<T> {
     }
 
     return this
+  }
+
+  map<G>(transform: Transform<T, G>, owner?: Object): Node<G> {
+    const value = transform(this.value, this.key)
+
+    if (owner && owner === this.owner) {
+      const res = (this as ValueNode<any>)
+      res.value = value
+      return (res as ValueNode<G>)
+    }
+
+    return new ValueNode<G>(
+      this.level,
+      this.hashCode,
+      this.key,
+      value,
+      owner
+    )
   }
 
   iterate(step: Predicate<T>) {
