@@ -1,6 +1,6 @@
 import Node from './Node'
 import { KVKey, Predicate, Transform, Option } from '../constants'
-import { map, spliceIn, replaceValue, spliceOut } from '../util/array'
+import { spliceIn, replaceValue, spliceOut } from '../util/array'
 import { maskHash, indexBitOnBitmap } from '../util/bitmap'
 import ValueNode from './ValueNode'
 
