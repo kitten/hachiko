@@ -111,21 +111,21 @@ export default class BitmapIndexedNode<T> {
 
     let size: number
     let content: Node<T>[]
+    const contentLength = this.content.length
 
-    if (node === undefined) {
+    if (!node) {
+      if (contentLength === 1) {
+        return undefined
+      } else if (contentLength === 2) {
+        const otherNode = this.content[1 - contentIndex]
+        if (otherNode.constructor !== BitmapIndexedNode) {
+          return otherNode
+        }
+      }
+
       size = this.size - oldNode.size
       content = spliceOut<Node<T>>(this.content, contentIndex)
     } else {
-      if (this.content.length === 1) {
-        return undefined
-      } else if (
-        this.content.length === 2 &&
-        this.level !== 0 &&
-        node.constructor !== BitmapIndexedNode
-      ) {
-        return node
-      }
-
       size = this.size + node.size - oldNode.size
       content = replaceValue<Node<T>>(this.content, contentIndex, node)
     }
