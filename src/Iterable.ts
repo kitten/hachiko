@@ -28,6 +28,21 @@ abstract class Iterable<T> {
 
     return this.owner ? mutable : mutable.asImmutable()
   }
+
+  find(predicate: Predicate<T>, notSetValue?: T): T {
+    let result = notSetValue
+
+    this.__iterate((value: T, key: KVKey) => {
+      if (predicate(value, key)) {
+        result = value
+        return true
+      }
+
+      return false
+    })
+
+    return result
+  }
 }
 
 export default Iterable
