@@ -1,8 +1,5 @@
-// These are mostly the same as Immutable.js's
-// They've done great work to make sure these functions are the fastest
-
 // See: https://jsperf.com/copy-array-inline
-export const copyArray = <T>(arr: T[]) => {
+export const copyArray = <T>(arr: T[]): T[] => {
   const length = arr.length
   const newArr = new Array(length)
 
@@ -13,7 +10,7 @@ export const copyArray = <T>(arr: T[]) => {
   return newArr
 }
 
-export const spliceIn = <T>(arr: T[], key: number, value: T) => {
+export const spliceIn = <T>(arr: T[], key: number, value: T): T[] => {
   const newLength = arr.length + 1
   const newArr = new Array(newLength)
 
@@ -30,7 +27,7 @@ export const spliceIn = <T>(arr: T[], key: number, value: T) => {
   return newArr
 }
 
-export const spliceOut = <T>(arr: T[], key: number) => {
+export const spliceOut = <T>(arr: T[], key: number): T[] => {
   const newLength = arr.length - 1
   const newArr = new Array(newLength)
 
@@ -46,7 +43,7 @@ export const spliceOut = <T>(arr: T[], key: number) => {
   return newArr
 }
 
-export const replaceValue = <T>(arr: T[], key: number, value: T) => {
+export const replaceValue = <T>(arr: T[], key: number, value: T): T[] => {
   const length = arr.length
   const newArr = new Array(length)
 
@@ -57,7 +54,7 @@ export const replaceValue = <T>(arr: T[], key: number, value: T) => {
   return newArr
 }
 
-export const indexOf = <T>(arr: T[], needle: T) => {
+export const indexOf = <T>(arr: T[], needle: T): number => {
   const length = arr.length
 
   for (let i = 0; i < length; i++) {
