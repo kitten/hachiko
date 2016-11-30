@@ -1,5 +1,6 @@
-import { KVKey, Predicate, Reducer, Option, Transform, Updater } from './constants'
+import { KVKey, KVTuple, Predicate, Reducer, Option, Transform, Updater } from './constants'
 import reduce from './iterableHelpers/reduce'
+import { find, findEntry, findKey } from './iterableHelpers/find'
 
 abstract class Iterable<T> {
   abstract size: number
@@ -44,7 +45,7 @@ abstract class Iterable<T> {
     return this.owner ? mutable : mutable.asImmutable()
   }
 
-  mapEntries<G>(transform: Transform<T, [KVKey, G]>): Iterable<G> {
+  mapEntries<G>(transform: Transform<T, KVTuple<G>>): Iterable<G> {
     const self = (this as Iterable<any>)
 
     let mutable = (self.owner ? self : self.asMutable()) as Iterable<G>
@@ -88,17 +89,27 @@ abstract class Iterable<T> {
   }
 
   find(predicate: Predicate<T>, notSetValue?: T): Option<T> {
-    let result = notSetValue
-    this.__iterate((value: T, key: KVKey) => {
-      if (predicate(value, key)) {
-        result = value
-        return true
-      }
+    return find<T>(this, false, predicate, notSetValue)
+  }
 
-      return false
-    })
+  findLast(predicate: Predicate<T>, notSetValue?: T): Option<T> {
+    return find<T>(this, true, predicate, notSetValue)
+  }
 
-    return result
+  findEntry(predicate: Predicate<T>, notSetValue?: T): Option<KVTuple<T>> {
+    return findEntry<T>(this, false, predicate)
+  }
+
+  findEntryLast(predicate: Predicate<T>, notSetValue?: T): Option<KVTuple<T>> {
+    return findEntry<T>(this, true, predicate)
+  }
+
+  findKey(predicate: Predicate<T>, notSetValue?: KVKey): Option<KVKey> {
+    return findKey<T>(this, false, predicate, notSetValue)
+  }
+
+  findKeyLast(predicate: Predicate<T>, notSetValue?: KVKey): Option<KVKey> {
+    return findKey<T>(this, true, predicate, notSetValue)
   }
 
   reduce<G>(reducer: Reducer<T, G>, initialValue?: any): G {
@@ -127,6 +138,19 @@ abstract class Iterable<T> {
     })
 
     return result
+  }
+
+  count(predicate: Predicate<T>): number {
+    let count = 0
+    this.__iterate((value: T, key: KVKey) => {
+      if (predicate(value, key)) {
+        count = count + 1
+      }
+
+      return false
+    })
+
+    return count
   }
 
   has(key: KVKey): boolean {
