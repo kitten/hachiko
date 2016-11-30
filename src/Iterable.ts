@@ -66,6 +66,26 @@ abstract class Iterable<T> {
 
     return result
   }
+
+  has(key: KVKey): boolean {
+    return this.__iterate((value: T, _key: KVKey) => {
+      if (key === _key) {
+        return true
+      }
+
+      return false
+    })
+  }
+
+  includes(value: T): boolean {
+    return this.__iterate((_value: T, key: KVKey) => {
+      if (value === _value) {
+        return true
+      }
+
+      return false
+    })
+  }
 }
 
 export default Iterable
