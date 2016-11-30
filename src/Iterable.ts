@@ -119,6 +119,16 @@ abstract class Iterable<T> {
     )
   }
 
+  join(separator = ','): string {
+    let result = ''
+    this.__iterate((value: T, key: KVKey) => {
+      result = (result ? result : result + separator) + value
+      return false
+    })
+
+    return result
+  }
+
   has(key: KVKey): boolean {
     return this.__iterate((value: T, _key: KVKey) => {
       if (key === _key) {
