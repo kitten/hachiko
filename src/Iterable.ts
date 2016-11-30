@@ -18,7 +18,6 @@ abstract class Iterable<T> {
 
   filter(predicate: Predicate<T>): Iterable<T> {
     let mutable = this.owner ? this : this.asMutable()
-
     this.__iterate((value: T, key: KVKey) => {
       if (!predicate(value, key)) {
         mutable = mutable.delete(key)
@@ -30,9 +29,21 @@ abstract class Iterable<T> {
     return this.owner ? mutable : mutable.asImmutable()
   }
 
+  filterNot(predicate: Predicate<T>): Iterable<T> {
+    let mutable = this.owner ? this : this.asMutable()
+    this.__iterate((value: T, key: KVKey) => {
+      if (predicate(value, key)) {
+        mutable = mutable.delete(key)
+      }
+
+      return false
+    })
+
+    return this.owner ? mutable : mutable.asImmutable()
+  }
+
   find(predicate: Predicate<T>, notSetValue?: T): Option<T> {
     let result = notSetValue
-
     this.__iterate((value: T, key: KVKey) => {
       if (predicate(value, key)) {
         result = value
@@ -48,7 +59,6 @@ abstract class Iterable<T> {
   reduce<G>(reducer: Reducer<T, G>, initialValue?: any): G {
     let unset = false
     let result = initialValue
-
     if (arguments.length === 1) {
       unset = true
     }
@@ -89,7 +99,6 @@ abstract class Iterable<T> {
 
   first(): Option<T> {
     let res: Option<T> = undefined
-
     this.__iterate((value: T, key: KVKey) => {
       res = value
       return true
@@ -100,7 +109,6 @@ abstract class Iterable<T> {
 
   last(): Option<T> {
     let res: Option<T> = undefined
-
     this.__iterate(
       (value: T, key: KVKey) => {
         res = value
