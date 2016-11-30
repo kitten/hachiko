@@ -1,4 +1,4 @@
-import { KVKey, Predicate, Reducer, Option } from './constants'
+import { KVKey, Predicate, Reducer, Option, Transform, Updater } from './constants'
 
 abstract class Iterable<T> {
   abstract size: number
@@ -14,6 +14,39 @@ abstract class Iterable<T> {
     let mutable = this.asMutable()
     closure(mutable)
     return mutable.asImmutable()
+  }
+
+  mapKeys(transform: Updater<KVKey>) {
+    let mutable = this.owner ? this : this.asMutable()
+    this.__iterate((value: T, key: KVKey) => {
+      const newKey = transform(key)
+      if (newKey !== key) {
+        mutable = mutable
+          .delete(key)
+          .set(newKey, value)
+      }
+
+      return false
+    })
+
+    return this.owner ? mutable : mutable.asImmutable()
+  }
+
+  mapEntries<G>(transform: Transform<T, [KVKey, G]>): Iterable<G> {
+    const self = (this as Iterable<any>)
+
+    let mutable = (self.owner ? self : self.asMutable()) as Iterable<G>
+    this.__iterate((value: T, key: KVKey) => {
+      const [newKey, newValue] = transform(value, key)
+      if (newKey !== key) {
+        mutable = mutable.delete(key)
+      }
+
+      mutable = mutable.set(newKey, newValue)
+      return false
+    })
+
+    return self.owner ? mutable : mutable.asImmutable()
   }
 
   filter(predicate: Predicate<T>): Iterable<T> {
