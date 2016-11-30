@@ -1,5 +1,6 @@
 import { KVKey, KVTuple, Predicate, Reducer, Option, Transform, Updater } from './constants'
 import reduce from './iterableHelpers/reduce'
+import filter from './iterableHelpers/filter'
 import { find, findEntry, findKey } from './iterableHelpers/find'
 
 abstract class Iterable<T> {
@@ -63,29 +64,11 @@ abstract class Iterable<T> {
   }
 
   filter(predicate: Predicate<T>): Iterable<T> {
-    let mutable = this.owner ? this : this.asMutable()
-    this.__iterate((value: T, key: KVKey) => {
-      if (!predicate(value, key)) {
-        mutable = mutable.delete(key)
-      }
-
-      return false
-    })
-
-    return this.owner ? mutable : mutable.asImmutable()
+    return filter<T>(this, predicate, false)
   }
 
   filterNot(predicate: Predicate<T>): Iterable<T> {
-    let mutable = this.owner ? this : this.asMutable()
-    this.__iterate((value: T, key: KVKey) => {
-      if (predicate(value, key)) {
-        mutable = mutable.delete(key)
-      }
-
-      return false
-    })
-
-    return this.owner ? mutable : mutable.asImmutable()
+    return filter<T>(this, predicate, true)
   }
 
   find(predicate: Predicate<T>, notSetValue?: T): Option<T> {
