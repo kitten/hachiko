@@ -135,6 +135,16 @@ abstract class Iterable<T> {
     })
   }
 
+  every(predicate: Predicate<T>) {
+    return !this.__iterate((value: T, key: KVKey) => (
+      !predicate(value, key)
+    ))
+  }
+
+  some(predicate: Predicate<T>) {
+    return this.__iterate(predicate)
+  }
+
   first(): Option<T> {
     let res: Option<T> = undefined
     this.__iterate((value: T, key: KVKey) => {
