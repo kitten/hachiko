@@ -1,4 +1,5 @@
 import { KVKey, Predicate, Reducer, Option, Transform, Updater } from './constants'
+import reduce from './iterableHelpers/reduce'
 
 abstract class Iterable<T> {
   abstract size: number
@@ -97,24 +98,21 @@ abstract class Iterable<T> {
   }
 
   reduce<G>(reducer: Reducer<T, G>, initialValue?: any): G {
-    let unset = false
-    let result = initialValue
-    if (arguments.length === 1) {
-      unset = true
-    }
+    return reduce<T, G>(
+      this,
+      false,
+      reducer,
+      initialValue
+    )
+  }
 
-    this.__iterate((value: T, key: KVKey) => {
-      if (unset) {
-        result = value
-        unset = false
-      } else {
-        result = reducer(result, value, key)
-      }
-
-      return false
-    })
-
-    return result
+  reduceRight<G>(reducer: Reducer<T, G>, initialValue?: any): G {
+    return reduce<T, G>(
+      this,
+      true,
+      reducer,
+      initialValue
+    )
   }
 
   has(key: KVKey): boolean {
