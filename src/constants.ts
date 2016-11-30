@@ -19,3 +19,7 @@ export interface Reducer<T, G> {
   (acc: any, value: T, key: KVKey): G
 }
 
+export interface Updater<T> {
+  (value: T): T
+}
+
