@@ -17,6 +17,10 @@ abstract class Iterable<T> {
     return mutable.asImmutable()
   }
 
+  isEmpty(): boolean {
+    return !this.size
+  }
+
   forEach(sideEffect: (value: T, key: KVKey) => void) {
     this.__iterate((value: T, key: KVKey) => {
       sideEffect(value, key)
