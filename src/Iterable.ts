@@ -4,7 +4,7 @@ abstract class Iterable<T> {
   abstract size: number
   abstract owner?: Object
 
-  abstract __iterate(step: Predicate<T>): boolean
+  abstract __iterate(step: Predicate<T>, reverse?: boolean): boolean
   abstract asMutable(): Iterable<T>
   abstract asImmutable(): Iterable<T>
   abstract set(key: KVKey, value: T): Iterable<T>
@@ -85,6 +85,31 @@ abstract class Iterable<T> {
 
       return false
     })
+  }
+
+  first(): Option<T> {
+    let res: Option<T> = undefined
+
+    this.__iterate((value: T, key: KVKey) => {
+      res = value
+      return true
+    })
+
+    return res
+  }
+
+  last(): Option<T> {
+    let res: Option<T> = undefined
+
+    this.__iterate(
+      (value: T, key: KVKey) => {
+        res = value
+        return true
+      },
+      true
+    )
+
+    return res
   }
 }
 

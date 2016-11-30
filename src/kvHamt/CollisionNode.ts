@@ -159,6 +159,19 @@ export default class CollisionNode<T> {
     return false
   }
 
+  iterateReverse(step: Predicate<T>) {
+    for (let i = this.keys.length; i >= 0; i--) {
+      const key = this.keys[i]
+      const value = this.values[i]
+
+      if (step(value, key) === true) {
+        return true
+      }
+    }
+
+    return false
+  }
+
   private clone(owner?: Object): CollisionNode<T> {
     return new CollisionNode(
       this.level,

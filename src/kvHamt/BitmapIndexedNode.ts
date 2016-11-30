@@ -183,4 +183,15 @@ export default class BitmapIndexedNode<T> {
 
     return false
   }
+
+  iterateReverse(step: Predicate<T>) {
+    for (let i = this.content.length; i >= 0; i--) {
+      const node: Node<T> = this.content[i]
+      if (node.iterateReverse(step) === true) {
+        return true
+      }
+    }
+
+    return false
+  }
 }

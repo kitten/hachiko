@@ -103,6 +103,10 @@ export default class ValueNode<T> {
     return step(this.value, this.key)
   }
 
+  iterateReverse(step: Predicate<T>) {
+    return step(this.value, this.key)
+  }
+
   private clone(owner?: Object): ValueNode<T> {
     return new ValueNode<T>(
       this.level,

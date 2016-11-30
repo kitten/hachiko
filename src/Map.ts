@@ -111,7 +111,11 @@ export default class Map<T> extends Iterable<T> {
     return mutable.asImmutable()
   }
 
-  __iterate(step: Predicate<T>) {
+  __iterate(step: Predicate<T>, reverse?: boolean) {
+    if (reverse) {
+      return this.root.iterateReverse(step)
+    }
+
     return this.root.iterate(step)
   }
 }
