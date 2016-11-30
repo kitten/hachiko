@@ -16,6 +16,13 @@ abstract class Iterable<T> {
     return mutable.asImmutable()
   }
 
+  forEach(sideEffect: (value: T, key: KVKey) => void) {
+    this.__iterate((value: T, key: KVKey) => {
+      sideEffect(value, key)
+      return false
+    })
+  }
+
   mapKeys(transform: Updater<KVKey>) {
     let mutable = this.owner ? this : this.asMutable()
     this.__iterate((value: T, key: KVKey) => {
