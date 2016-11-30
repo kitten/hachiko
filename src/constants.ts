@@ -15,3 +15,7 @@ export interface Transform<T, G> {
   (value: T, key: KVKey): G
 }
 
+export interface Reducer<T, G> {
+  (acc: any, value: T, key: KVKey): G
+}
+

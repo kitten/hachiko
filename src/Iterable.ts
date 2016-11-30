@@ -1,6 +1,7 @@
-import { KVKey, Predicate, Option } from './constants'
+import { KVKey, Predicate, Reducer, Option } from './constants'
 
 abstract class Iterable<T> {
+  abstract size: number
   abstract owner?: Object
 
   abstract __iterate(step: Predicate<T>): boolean
@@ -36,6 +37,28 @@ abstract class Iterable<T> {
       if (predicate(value, key)) {
         result = value
         return true
+      }
+
+      return false
+    })
+
+    return result
+  }
+
+  reduce<G>(reducer: Reducer<T, G>, initialValue?: any): G {
+    let unset = false
+    let result = initialValue
+
+    if (arguments.length === 1) {
+      unset = true
+    }
+
+    this.__iterate((value: T, key: KVKey) => {
+      if (unset) {
+        result = value
+        unset = false
+      } else {
+        result = reducer(result, value, key)
       }
 
       return false
