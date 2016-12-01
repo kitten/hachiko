@@ -44,7 +44,7 @@ export default class BitmapIndexedNode<T> {
 
     if (!hasContent) {
       const node = new ValueNode(
-        this.level,
+        this.level + 1,
         hashCode,
         key,
         value,
