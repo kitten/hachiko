@@ -1,7 +1,9 @@
-import { KVKey, Predicate, Transform, Updater, Option } from './constants'
+import { KVKey, KVTuple, Predicate, Transform, Updater, Option } from './constants'
 import hash from './util/hash'
 import BitmapIndexedNode from './kvHamt/BitmapIndexedNode'
 import Iterable from './Iterable'
+import IteratorSymbol from './util/iteratorSymbol'
+import Iterator from './kvHamt/Iterator'
 
 let EMPTY_MAP: Map<any>
 function emptyMap<T>(): Map<T> {
@@ -117,5 +119,21 @@ export default class Map<T> extends Iterable<T> {
     }
 
     return this.root.iterate(step)
+  }
+
+  values(): Iterator<T, T> {
+    return new Iterator<T, T>(this.root, (value: T, key: KVKey) => value)
+  }
+
+  keys(): Iterator<T, KVKey> {
+    return new Iterator<T, KVKey>(this.root, (value: T, key: KVKey) => key)
+  }
+
+  entries(): Iterator<T, KVTuple<T>> {
+    return new Iterator<T, KVTuple<T>>(this.root, (value: T, key: KVKey) => [ key, value ])
+  }
+
+  [IteratorSymbol](): Iterator<T, KVTuple<T>> {
+    return this.entries()
   }
 }

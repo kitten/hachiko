@@ -8,7 +8,12 @@
     "moduleResolution": "node",
     "pretty": true,
     "sourceMap": true,
-    "declaration": true
+    "declaration": true,
+    "lib": [
+      "es6",
+      "scripthost",
+      "es2015.symbol"
+    ]
   },
   "include": [
     "src/**/*.ts"
