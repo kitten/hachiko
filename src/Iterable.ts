@@ -45,14 +45,21 @@ abstract class Iterable<T> {
     })
   }
 
-  merge(iterables: (Dict<T> | Iterable<T>)[]): Iterable<T> {
+  merge(iterables: (Dict<T>[] | Iterable<T>[])): Iterable<T> {
+    if (!iterables.length) {
+      return this
+    }
+
     let mutable = this.owner ? this : this.asMutable()
+
+    // Enforce iterables to be all of same type
+    const isIterables = Iterable.isIterable(iterables[0])
 
     const length = iterables.length
     for (let i = 0; i < length; i++) {
       const iterable = iterables[i]
 
-      if (!Iterable.isIterable(iterable) && typeof iterable === 'object') {
+      if (!isIterables) {
         const _iterable = (iterable as Dict<T>)
         const keys = Object.keys(_iterable)
         const length = keys.length
