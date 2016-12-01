@@ -13,7 +13,7 @@ const hash = (x: number | string): number => {
   let hash = 0
 
   for (let i = 0; i < length; i++) {
-    hash = 31 * hash + x.charCodeAt(i)
+    hash = 31 * hash + x.charCodeAt(i) | 0
   }
 
   return toInt32(hash)
