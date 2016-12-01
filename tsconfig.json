@@ -10,6 +10,7 @@
     "sourceMap": true,
     "declaration": true,
     "lib": [
+      "dom",
       "es6",
       "scripthost",
       "es2015.symbol"

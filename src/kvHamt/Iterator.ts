@@ -3,6 +3,7 @@ import Node from './Node'
 import ValueNode from './ValueNode'
 import CollisionNode from './CollisionNode'
 import BitmapIndexedNode from './BitmapIndexedNode'
+import IterableSymbol from '../util/iteratorSymbol'
 
 export class IteratorContext<T> {
   node: Node<T>
@@ -36,7 +37,7 @@ function advanceIteratorContext<T>(context: IteratorContext<T>): Option<Iterator
   let cursor = context.prev
   while (
     cursor &&
-    cursor.index >= (cursor.node as BitmapIndexedNode<T>).content.length
+    (cursor.index + 1) >= (cursor.node as BitmapIndexedNode<T>).content.length
   ) {
     cursor = cursor.prev
   }
@@ -102,5 +103,9 @@ export default class Iterator<T, R> {
       value: this.transform(value, key),
       done: false
     }
+  }
+
+  [IterableSymbol](): this {
+    return this
   }
 }

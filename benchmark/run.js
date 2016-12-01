@@ -26,6 +26,9 @@ const run = (path) => {
 
     return benchmark
         .on('complete', log)
+        .on('error', err => {
+            console.error(err)
+        })
         .run(true);
 };
 
@@ -39,3 +42,4 @@ run('./benchmarks/remove_all_transient');
 run('./benchmarks/count');
 run('./benchmarks/sum');
 run('./benchmarks/keys');
+run('./benchmarks/iterator');
