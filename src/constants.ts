@@ -8,6 +8,10 @@ export type Option<T> = T | undefined;
 export type KVKey = string | number
 export type KVTuple<T> = [ KVKey, T ]
 
+export interface Dict<T> {
+  [key: string]: T
+}
+
 export interface Predicate<T> {
   (value: T, key: KVKey): boolean
 }

@@ -1,4 +1,15 @@
-import { KVKey, KVTuple, Predicate, Reducer, Option, Transform, Updater } from './constants'
+import {
+  KVKey,
+  KVTuple,
+  Dict,
+  ArrayMap,
+  Predicate,
+  Reducer,
+  Option,
+  Transform,
+  Updater
+} from './constants'
+
 import reduce from './iterableHelpers/reduce'
 import filter from './iterableHelpers/filter'
 import { find, findEntry, findKey } from './iterableHelpers/find'
@@ -6,6 +17,10 @@ import { find, findEntry, findKey } from './iterableHelpers/find'
 abstract class Iterable<T> {
   abstract size: number
   abstract owner?: Object
+
+  static isIterable(object: any) {
+    return object && object instanceof Iterable
+  }
 
   abstract __iterate(step: Predicate<T>, reverse?: boolean): boolean
   abstract asMutable(): Iterable<T>
@@ -30,7 +45,34 @@ abstract class Iterable<T> {
     })
   }
 
-  mapKeys(transform: Updater<KVKey>) {
+  merge(iterables: (Dict<T> | Iterable<T>)[]): Iterable<T> {
+    let mutable = this.owner ? this : this.asMutable()
+
+    const length = iterables.length
+    for (let i = 0; i < length; i++) {
+      const iterable = iterables[i]
+
+      if (!Iterable.isIterable(iterable) && typeof iterable === 'object') {
+        const _iterable = (iterable as Dict<T>)
+        const keys = Object.keys(_iterable)
+        const length = keys.length
+
+        for (let j = 0; j < length; j++) {
+          const key = keys[j]
+          mutable = mutable.set(key, _iterable[key])
+        }
+      } else {
+        (iterable as Iterable<T>).__iterate((value: T, key: KVKey) => {
+          mutable = mutable.set(key, value)
+          return false
+        })
+      }
+    }
+
+    return this.owner ? mutable : mutable.asImmutable()
+  }
+
+  mapKeys(transform: Updater<KVKey>): Iterable<T> {
     let mutable = this.owner ? this : this.asMutable()
     this.__iterate((value: T, key: KVKey) => {
       const newKey = transform(key)
