@@ -73,22 +73,22 @@ describe('CollisionNode', () => {
       expect(result).toBeInstanceOf(BitmapIndexedNode)
       expect(result.size).toBe(3)
 
-      const aNode = result.content[0] as CollisionNode<number>
+      const aNode = result.content[1] as CollisionNode<number>
       expect(aNode).toBeInstanceOf(CollisionNode)
       expect(aNode.keys).toBe(keys)
       expect(aNode.values).toBe(values)
       expect(aNode.hashCode).toBe(hashCode)
 
-      const bNode = result.content[1] as ValueNode<number>
+      const bNode = result.content[0] as ValueNode<number>
       expect(bNode).toBeInstanceOf(ValueNode)
       expect(bNode.key).toBe(newKey)
       expect(bNode.value).toBe(newValue)
 
-      const aIndex = indexBitOnBitmap(result.bitmap, maskHash(hashCode, 1))
-      expect(aIndex).toBe(0)
+      const aIndex = indexBitOnBitmap(result.bitmap, maskHash(hashCode, 0))
+      expect(aIndex).toBe(1)
 
-      const bIndex = indexBitOnBitmap(result.bitmap, maskHash(newHashCode, 1))
-      expect(bIndex).toBe(1)
+      const bIndex = indexBitOnBitmap(result.bitmap, maskHash(newHashCode, 0))
+      expect(bIndex).toBe(0)
     })
   })
 })

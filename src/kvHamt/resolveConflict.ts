@@ -12,8 +12,8 @@ export default function resolveConflict<T>(
   owner?: Object
 ): Node<T> {
   const nextLevel = level + 1
-  const aPositionBitmap = maskHash(aHashCode, nextLevel)
-  const bPositionBitmap = maskHash(bHashCode, nextLevel)
+  const aPositionBitmap = maskHash(aHashCode, level)
+  const bPositionBitmap = maskHash(bHashCode, level)
 
   if (aPositionBitmap === bPositionBitmap) {
     // Resolve deep conflict
@@ -28,7 +28,7 @@ export default function resolveConflict<T>(
     )
 
     return new BitmapIndexedNode<T>(
-      nextLevel,
+      level,
       subNode.size,
       aPositionBitmap,
       [ subNode ],
@@ -49,7 +49,7 @@ export default function resolveConflict<T>(
   content[bIndex] = bNode
 
   return new BitmapIndexedNode<T>(
-    nextLevel,
+    level,
     aNode.size + bNode.size,
     bitmap,
     content,

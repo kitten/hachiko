@@ -72,19 +72,19 @@ describe('ValueNode', () => {
       expect(result).toBeInstanceOf(BitmapIndexedNode)
       expect(result.size).toBe(2)
 
-      const aNode = result.content[0] as ValueNode<string>
+      const aNode = result.content[1] as ValueNode<string>
       expect(aNode.key).toBe(key)
       expect(aNode.value).toBe(value)
 
-      const bNode = result.content[1] as ValueNode<string>
+      const bNode = result.content[0] as ValueNode<string>
       expect(bNode.key).toBe(newKey)
       expect(bNode.value).toBe(newValue)
 
-      const aIndex = indexBitOnBitmap(result.bitmap, maskHash(newHashCode, 1))
-      expect(aIndex).toBe(1)
+      const aIndex = indexBitOnBitmap(result.bitmap, maskHash(newHashCode, 0))
+      expect(aIndex).toBe(0)
 
-      const bIndex = indexBitOnBitmap(result.bitmap, maskHash(hashCode, 1))
-      expect(bIndex).toBe(0)
+      const bIndex = indexBitOnBitmap(result.bitmap, maskHash(hashCode, 0))
+      expect(bIndex).toBe(1)
     })
   })
 })
