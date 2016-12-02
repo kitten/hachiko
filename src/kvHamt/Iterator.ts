@@ -1,4 +1,4 @@
-import { KVKey, Option, Transform } from '../constants'
+import { KVKey, KVTuple, Option, Transform } from '../constants'
 import Node from './Node'
 import ValueNode from './ValueNode'
 import CollisionNode from './CollisionNode'
@@ -57,14 +57,14 @@ export interface IteratorResult<T> {
   done: boolean
 }
 
-export default class Iterator<T, R> {
+export abstract class Iterator<T, R> {
   context?: IteratorContext<T>
-  transform: Transform<T, R>
 
-  constructor(root: Node<T>, transform: Transform<T, R>) {
-    this.transform = transform
+  constructor(root: Node<T>) {
     this.context = wrapIteratorContext<T>(root)
   }
+
+  abstract __transform(key: KVKey, value: T): R
 
   next(): IteratorResult<R> {
     const { context } = this
@@ -72,32 +72,51 @@ export default class Iterator<T, R> {
       return { done: true }
     }
 
+    let key: KVKey
+    let value: T
+
     if (context.node.constructor === ValueNode) {
       const node = context.node as ValueNode<T>
-      this.context = advanceIteratorContext<T>(context)
+      key = node.key
+      value = node.value
 
-      return {
-        value: this.transform(node.value, node.key),
-        done: false
+      this.context = advanceIteratorContext<T>(context)
+    } else {
+      const node = context.node as CollisionNode<T>
+      value = node.values[context.index]
+      key = node.keys[context.index]
+
+      context.index = context.index + 1
+      if (context.index >= node.values.length) {
+        this.context = advanceIteratorContext<T>(context)
       }
     }
 
-    const node = context.node as CollisionNode<T>
-    const value = node.values[context.index]
-    const key = node.keys[context.index]
-
-    context.index = context.index + 1
-    if (context.index >= node.values.length) {
-      this.context = advanceIteratorContext<T>(context)
-    }
-
     return {
-      value: this.transform(value, key),
+      value: this.__transform(key, value),
       done: false
     }
   }
 
   [IterableSymbol](): this {
     return this
+  }
+}
+
+export class KeyIterator<T> extends Iterator<T, KVKey> {
+  __transform(key: KVKey, value: T): KVKey {
+    return key
+  }
+}
+
+export class ValueIterator<T> extends Iterator<T, T> {
+  __transform(key: KVKey, value: T): T {
+    return value
+  }
+}
+
+export class EntryIterator<T> extends Iterator<T, KVTuple<T>> {
+  __transform(key: KVKey, value: T): KVTuple<T> {
+    return [ key, value ]
   }
 }

@@ -3,7 +3,12 @@ import hash from './util/hash'
 import BitmapIndexedNode from './kvHamt/BitmapIndexedNode'
 import Iterable from './Iterable'
 import IteratorSymbol from './util/iteratorSymbol'
-import Iterator from './kvHamt/Iterator'
+
+import {
+  KeyIterator,
+  ValueIterator,
+  EntryIterator
+} from './kvHamt/Iterator'
 
 let EMPTY_MAP: Map<any>
 function emptyMap<T>(): Map<T> {
@@ -121,19 +126,19 @@ export default class Map<T> extends Iterable<T> {
     return this.root.iterate(step)
   }
 
-  values(): Iterator<T, T> {
-    return new Iterator<T, T>(this.root, (value: T, key: KVKey) => value)
+  values(): ValueIterator<T> {
+    return new ValueIterator<T>(this.root)
   }
 
-  keys(): Iterator<T, KVKey> {
-    return new Iterator<T, KVKey>(this.root, (value: T, key: KVKey) => key)
+  keys(): KeyIterator<T> {
+    return new KeyIterator<T>(this.root)
   }
 
-  entries(): Iterator<T, KVTuple<T>> {
-    return new Iterator<T, KVTuple<T>>(this.root, (value: T, key: KVKey) => [ key, value ])
+  entries(): EntryIterator<T> {
+    return new EntryIterator<T>(this.root)
   }
 
-  [IteratorSymbol](): Iterator<T, KVTuple<T>> {
+  [IteratorSymbol](): EntryIterator<T> {
     return this.entries()
   }
 }
