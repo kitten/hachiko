@@ -10,49 +10,46 @@ export class IteratorContext<T> {
   index: number
   prev?: IteratorContext<T>
 
-  constructor(node: Node<T>, index: number, prev?: IteratorContext<T>) {
+  constructor(node: Node<T>, prev?: IteratorContext<T>) {
     this.node = node
-    this.index = index
     this.prev = prev
+    this.index = 0
   }
 }
 
-function makeIteratorContext<T>(root: Node<T>): Option<IteratorContext<T>> {
-  let context: Option<IteratorContext<T>> = undefined
-  let node = root
+function wrapIteratorContext<T>(node: Node<T>, prev?: IteratorContext<T>): IteratorContext<T> {
+  const context = new IteratorContext<T>(node, prev)
 
-  while (node.constructor === BitmapIndexedNode) {
-    context = new IteratorContext<T>(node, 0, context)
-    node = (node as BitmapIndexedNode<T>).content[0]
+  if (node.constructor !== BitmapIndexedNode) {
+    return context
   }
 
-  return new IteratorContext<T>(node, 0, context)
+  const subNode = (node as BitmapIndexedNode<T>).content[0]
+  return wrapIteratorContext<T>(subNode, context)
+}
+
+function unwrapIteratorContext<T>(context: IteratorContext<T>): Option<IteratorContext<T>> {
+  const { prev } = context
+  if (!prev) {
+    return undefined
+  } else if (prev.index < (prev.node as BitmapIndexedNode<T>).content.length - 1) {
+    return prev
+  }
+
+  return unwrapIteratorContext<T>(prev)
 }
 
 function advanceIteratorContext<T>(context: IteratorContext<T>): Option<IteratorContext<T>> {
-  let cursor = context.prev
-  while (
-    cursor &&
-    (cursor.index + 1) >= (cursor.node as BitmapIndexedNode<T>).content.length
-  ) {
-    cursor = cursor.prev
-  }
-
-  if (!cursor) {
+  const unwrapped = unwrapIteratorContext<T>(context)
+  if (!unwrapped) {
     return undefined
   }
 
-  cursor.index = cursor.index + 1
+  const index = unwrapped.index + 1
+  const node = (unwrapped.node as BitmapIndexedNode<T>).content[index]
 
-  let node = (cursor.node as BitmapIndexedNode<T>).content[cursor.index]
-  let nextContext = new IteratorContext(node, 0, cursor)
-
-  while (node.constructor === BitmapIndexedNode) {
-    node = (node as BitmapIndexedNode<T>).content[0]
-    nextContext = new IteratorContext<T>(node, 0, nextContext)
-  }
-
-  return nextContext
+  unwrapped.index = index
+  return wrapIteratorContext<T>(node, unwrapped)
 }
 
 export interface IteratorResult<T> {
@@ -66,7 +63,7 @@ export default class Iterator<T, R> {
 
   constructor(root: Node<T>, transform: Transform<T, R>) {
     this.transform = transform
-    this.context = makeIteratorContext<T>(root)
+    this.context = wrapIteratorContext<T>(root)
   }
 
   next(): IteratorResult<R> {
@@ -75,24 +72,23 @@ export default class Iterator<T, R> {
       return { done: true }
     }
 
-    let value: T
-    let key: KVKey
-
-    if (context.node instanceof ValueNode) {
+    if (context.node.constructor === ValueNode) {
       const node = context.node as ValueNode<T>
       this.context = advanceIteratorContext<T>(context)
 
-      value = node.value
-      key = node.key
-    } else {
-      const node = context.node as CollisionNode<T>
-      value = node.values[context.index]
-      key = node.keys[context.index]
-
-      context.index = context.index + 1
-      if (context.index >= node.values.length) {
-        this.context = advanceIteratorContext<T>(context)
+      return {
+        value: this.transform(node.value, node.key),
+        done: false
       }
+    }
+
+    const node = context.node as CollisionNode<T>
+    const value = node.values[context.index]
+    const key = node.keys[context.index]
+
+    context.index = context.index + 1
+    if (context.index >= node.values.length) {
+      this.context = advanceIteratorContext<T>(context)
     }
 
     return {
