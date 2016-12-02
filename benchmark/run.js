@@ -43,3 +43,4 @@ run('./benchmarks/count');
 run('./benchmarks/sum');
 run('./benchmarks/keys');
 run('./benchmarks/iterator');
+run('./benchmarks/merge');
