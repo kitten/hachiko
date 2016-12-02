@@ -28,3 +28,7 @@ export interface Updater<T> {
   (value: T): T
 }
 
+export interface Merger<T> {
+  (prev: T, next: T, key: KVKey): T
+}
+

@@ -6,7 +6,8 @@ import {
   Reducer,
   Option,
   Transform,
-  Updater
+  Updater,
+  Merger
 } from './constants'
 
 import reduce from './iterableHelpers/reduce'
@@ -24,6 +25,7 @@ abstract class Iterable<T> {
   abstract __iterate(step: Predicate<T>, reverse?: boolean): boolean
   abstract asMutable(): Iterable<T>
   abstract asImmutable(): Iterable<T>
+  abstract get(key: KVKey, notSetVal?: T): Option<T>
   abstract set(key: KVKey, value: T): Iterable<T>
   abstract delete(key: KVKey): Iterable<T>
 
@@ -70,6 +72,53 @@ abstract class Iterable<T> {
       } else {
         (iterable as Iterable<T>).__iterate((value: T, key: KVKey) => {
           mutable = mutable.set(key, value)
+          return false
+        })
+      }
+    }
+
+    return this.owner ? mutable : mutable.asImmutable()
+  }
+
+  mergeWith(
+    merger: Merger<T>,
+    iterables: (Dict<T>[] | Iterable<T>[])
+  ): Iterable<T> {
+    if (!iterables.length) {
+      return this
+    }
+
+    let mutable = this.owner ? this : this.asMutable()
+
+    // Enforce iterables to be all of same type
+    const isIterables = Iterable.isIterable(iterables[0])
+
+    const length = iterables.length
+    for (let i = 0; i < length; i++) {
+      const iterable = iterables[i]
+
+      if (!isIterables) {
+        const _iterable = (iterable as Dict<T>)
+        const keys = Object.keys(_iterable)
+        const length = keys.length
+
+        for (let j = 0; j < length; j++) {
+          const key = keys[j]
+          const prev = mutable.get(key)
+          const next = (prev !== undefined) ?
+            merger(prev, _iterable[key], key) :
+            _iterable[key]
+
+          mutable = mutable.set(key, next)
+        }
+      } else {
+        (iterable as Iterable<T>).__iterate((value: T, key: KVKey) => {
+          const prev = mutable.get(key)
+          const next = (prev !== undefined) ?
+            merger(prev, value, key) :
+            value
+
+          mutable = mutable.set(key, next)
           return false
         })
       }
