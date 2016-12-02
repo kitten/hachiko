@@ -26,11 +26,7 @@ function makeIteratorContext<T>(root: Node<T>): Option<IteratorContext<T>> {
     node = (node as BitmapIndexedNode<T>).content[0]
   }
 
-  if (node) {
-    context = new IteratorContext<T>(node, 0, context)
-  }
-
-  return context
+  return new IteratorContext<T>(node, 0, context)
 }
 
 function advanceIteratorContext<T>(context: IteratorContext<T>): Option<IteratorContext<T>> {
@@ -49,7 +45,7 @@ function advanceIteratorContext<T>(context: IteratorContext<T>): Option<Iterator
   cursor.index = cursor.index + 1
 
   let node = (cursor.node as BitmapIndexedNode<T>).content[cursor.index]
-  let nextContext = new IteratorContext(node, cursor.index, cursor)
+  let nextContext = new IteratorContext(node, 0, cursor)
 
   while (node.constructor === BitmapIndexedNode) {
     node = (node as BitmapIndexedNode<T>).content[0]
