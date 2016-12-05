@@ -1,5 +1,10 @@
 "use strict";
 const api = require('../shared');
+const ht = require('hashtrie');
+const hamt = require('hamt');
+const hamt_plus = require('hamt_plus');
+const mori = require('mori');
+const immutable = require('immutable');
 
 module.exports = {
     name: 'Remove Nth',
