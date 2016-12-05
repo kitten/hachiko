@@ -1,18 +1,19 @@
 import {
   KVKey,
   KVTuple,
-  Dict,
+  Merger,
   Predicate,
   Reducer,
   Option,
   Transform,
   Updater,
-  Merger
+  Dict
 } from './constants'
 
 import reduce from './iterableHelpers/reduce'
 import filter from './iterableHelpers/filter'
 import { find, findEntry, findKey } from './iterableHelpers/find'
+import { merge, mergeWith } from './iterableHelpers/merge'
 
 abstract class Iterable<T> {
   abstract size: number
@@ -47,84 +48,11 @@ abstract class Iterable<T> {
   }
 
   merge(iterables: (Dict<T>[] | Iterable<T>[])): Iterable<T> {
-    if (!iterables.length) {
-      return this
-    }
-
-    let mutable = this.owner ? this : this.asMutable()
-
-    // Enforce iterables to be all of same type
-    const isIterables = Iterable.isIterable(iterables[0])
-
-    const length = iterables.length
-    for (let i = 0; i < length; i++) {
-      const iterable = iterables[i]
-
-      if (!isIterables) {
-        const _iterable = (iterable as Dict<T>)
-        const keys = Object.keys(_iterable)
-        const length = keys.length
-
-        for (let j = 0; j < length; j++) {
-          const key = keys[j]
-          mutable = mutable.set(key, _iterable[key])
-        }
-      } else {
-        (iterable as Iterable<T>).__iterate((value: T, key: KVKey) => {
-          mutable = mutable.set(key, value)
-          return false
-        })
-      }
-    }
-
-    return this.owner ? mutable : mutable.asImmutable()
+    return merge<T>(this, iterables)
   }
 
-  mergeWith(
-    merger: Merger<T>,
-    iterables: (Dict<T>[] | Iterable<T>[])
-  ): Iterable<T> {
-    if (!iterables.length) {
-      return this
-    }
-
-    let mutable = this.owner ? this : this.asMutable()
-
-    // Enforce iterables to be all of same type
-    const isIterables = Iterable.isIterable(iterables[0])
-
-    const length = iterables.length
-    for (let i = 0; i < length; i++) {
-      const iterable = iterables[i]
-
-      if (!isIterables) {
-        const _iterable = (iterable as Dict<T>)
-        const keys = Object.keys(_iterable)
-        const length = keys.length
-
-        for (let j = 0; j < length; j++) {
-          const key = keys[j]
-          const prev = mutable.get(key)
-          const next = (prev !== undefined) ?
-            merger(prev, _iterable[key], key) :
-            _iterable[key]
-
-          mutable = mutable.set(key, next)
-        }
-      } else {
-        (iterable as Iterable<T>).__iterate((value: T, key: KVKey) => {
-          const prev = mutable.get(key)
-          const next = (prev !== undefined) ?
-            merger(prev, value, key) :
-            value
-
-          mutable = mutable.set(key, next)
-          return false
-        })
-      }
-    }
-
-    return this.owner ? mutable : mutable.asImmutable()
+  mergeWith(merger: Merger<T>, iterables: (Dict<T>[] | Iterable<T>[])): Iterable<T> {
+    return mergeWith<T>(this, merger, iterables)
   }
 
   mapKeys(transform: Updater<KVKey>): Iterable<T> {
