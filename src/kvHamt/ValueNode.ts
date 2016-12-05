@@ -107,7 +107,7 @@ export default class ValueNode<T> {
     return step(this.value, this.key)
   }
 
-  private clone(owner?: Object): ValueNode<T> {
+  clone(owner?: Object): ValueNode<T> {
     return new ValueNode<T>(
       this.level,
       this.hashCode,

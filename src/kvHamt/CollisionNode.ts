@@ -71,6 +71,7 @@ export default class CollisionNode<T> {
     if (owner && owner === this.owner) {
       this.keys = keys
       this.values = values
+      this.size = keys.length
       return this
     }
 
@@ -97,8 +98,8 @@ export default class CollisionNode<T> {
       return new ValueNode<T>(
         this.level,
         this.hashCode,
-        this.keys[index],
-        this.values[index],
+        this.keys[1 - index],
+        this.values[1 - index],
         owner
       )
     }
@@ -109,6 +110,7 @@ export default class CollisionNode<T> {
     if (owner && owner === this.owner) {
       this.keys = keys
       this.values = values
+      this.size = keys.length
       return this
     }
 
@@ -172,7 +174,7 @@ export default class CollisionNode<T> {
     return false
   }
 
-  private clone(owner?: Object): CollisionNode<T> {
+  clone(owner?: Object): CollisionNode<T> {
     return new CollisionNode(
       this.level,
       this.hashCode,

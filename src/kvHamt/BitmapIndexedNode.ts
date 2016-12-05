@@ -97,7 +97,6 @@ export default class BitmapIndexedNode<T> {
   delete(hashCode: number, key: KVKey, owner?: Object): Option<Node<T>> {
     const positionBitmap = maskHash(hashCode, this.level)
     const hasContent = this.bitmap & positionBitmap
-
     if (!hasContent) {
       return this
     }
@@ -105,33 +104,47 @@ export default class BitmapIndexedNode<T> {
     const contentIndex = indexBitOnBitmap(this.bitmap, positionBitmap)
     const oldNode = this.content[contentIndex]
 
+    if (!oldNode) {
+      console.log(this.content)
+    }
+
     const node: Option<Node<T>> = oldNode.delete(hashCode, key, owner)
     if (node === oldNode) {
       return this
     }
 
+    let bitmap: number
     let size: number
     let content: Node<T>[]
     const contentLength = this.content.length
 
     if (!node) {
-      if (contentLength === 1) {
+      const isRoot = this.level === 0
+      if (!isRoot && contentLength === 1) {
         return undefined
-      } else if (contentLength === 2) {
+      } else if (!isRoot && contentLength === 2) {
         const otherNode = this.content[1 - contentIndex]
+
         if (otherNode.constructor !== BitmapIndexedNode) {
-          return otherNode
+          if (owner && owner === otherNode.owner) {
+            otherNode.level = this.level
+            return otherNode
+          }
+
+          const _otherNode = otherNode.clone()
+          _otherNode.level = this.level
+          return _otherNode
         }
       }
 
+      bitmap = this.bitmap ^ positionBitmap
       size = this.size - oldNode.size
       content = spliceOut<Node<T>>(this.content, contentIndex)
     } else {
+      bitmap = this.bitmap
       size = this.size + node.size - oldNode.size
       content = replaceValue<Node<T>>(this.content, contentIndex, node)
     }
-
-    const bitmap = this.bitmap ^ positionBitmap
 
     if (owner && owner === this.owner) {
       this.size = size
@@ -193,5 +206,15 @@ export default class BitmapIndexedNode<T> {
     }
 
     return false
+  }
+
+  clone(owner?: Object): BitmapIndexedNode<T> {
+    return new BitmapIndexedNode<T>(
+      this.level,
+      this.size,
+      this.bitmap,
+      this.content,
+      owner
+    )
   }
 }

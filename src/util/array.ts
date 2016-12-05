@@ -28,15 +28,15 @@ export const spliceIn = <T>(arr: T[], key: number, value: T): T[] => {
 }
 
 export const spliceOut = <T>(arr: T[], key: number): T[] => {
-  const newLength = arr.length - 1
-  const newArr = new Array(newLength)
+  const length = arr.length
+  const newArr = new Array(length - 1)
 
   let after = 0
-  for (let i = 0; i < newLength; i++) {
+  for (let i = 0; i < length; i++) {
     if (i === key) {
-      after = 1
+      after = -1
     } else {
-      newArr[i] = arr[i + after]
+      newArr[i + after] = arr[i]
     }
   }
 
