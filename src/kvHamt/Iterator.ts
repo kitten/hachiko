@@ -1,4 +1,4 @@
-import { KVKey, KVTuple, Option, Transform } from '../constants'
+import { KVKey, KVTuple, Option } from '../constants'
 import Node from './Node'
 import ValueNode from './ValueNode'
 import CollisionNode from './CollisionNode'
@@ -14,42 +14,38 @@ export class IteratorContext<T> {
     this.node = node
     this.prev = prev
     this.index = 0
-  }
-}
 
-function wrapIteratorContext<T>(node: Node<T>, prev?: IteratorContext<T>): IteratorContext<T> {
-  const context = new IteratorContext<T>(node, prev)
+    if (node.constructor !== BitmapIndexedNode) {
+      return this
+    }
 
-  if (node.constructor !== BitmapIndexedNode) {
-    return context
-  }
-
-  const subNode = (node as BitmapIndexedNode<T>).content[0]
-  return wrapIteratorContext<T>(subNode, context)
-}
-
-function unwrapIteratorContext<T>(context: IteratorContext<T>): Option<IteratorContext<T>> {
-  const { prev } = context
-  if (!prev) {
-    return undefined
-  } else if (prev.index < (prev.node as BitmapIndexedNode<T>).content.length - 1) {
-    return prev
+    const subNode = (node as BitmapIndexedNode<T>).content[0]
+    return new IteratorContext<T>(subNode, this)
   }
 
-  return unwrapIteratorContext<T>(prev)
-}
+  unwrap(): Option<IteratorContext<T>> {
+    const { prev } = this
+    if (!prev) {
+      return undefined
+    } else if (prev.index < (prev.node as BitmapIndexedNode<T>).content.length - 1) {
+      return prev
+    }
 
-function advanceIteratorContext<T>(context: IteratorContext<T>): Option<IteratorContext<T>> {
-  const unwrapped = unwrapIteratorContext<T>(context)
-  if (!unwrapped) {
-    return undefined
+    return prev.unwrap()
   }
 
-  const index = unwrapped.index + 1
-  const node = (unwrapped.node as BitmapIndexedNode<T>).content[index]
+  advance(): Option<IteratorContext<T>> {
+    const unwrapped = this.unwrap()
+    if (!unwrapped) {
+      return undefined
+    }
 
-  unwrapped.index = index
-  return wrapIteratorContext<T>(node, unwrapped)
+    const index = unwrapped.index + 1
+    const node = (unwrapped.node as BitmapIndexedNode<T>).content[index]
+
+    unwrapped.index = index
+    return new IteratorContext<T>(node, unwrapped)
+  }
 }
 
 export interface IteratorResult<T> {
@@ -61,7 +57,7 @@ export abstract class Iterator<T, R> {
   context?: IteratorContext<T>
 
   constructor(root: Node<T>) {
-    this.context = wrapIteratorContext<T>(root)
+    this.context = new IteratorContext<T>(root)
   }
 
   abstract __transform(key: KVKey, value: T): R
@@ -80,7 +76,7 @@ export abstract class Iterator<T, R> {
       key = node.key
       value = node.value
 
-      this.context = advanceIteratorContext<T>(context)
+      this.context = context.advance()
     } else {
       const node = context.node as CollisionNode<T>
       value = node.values[context.index]
@@ -88,7 +84,7 @@ export abstract class Iterator<T, R> {
 
       context.index = context.index + 1
       if (context.index >= node.values.length) {
-        this.context = advanceIteratorContext<T>(context)
+        this.context = context.advance()
       }
     }
 
