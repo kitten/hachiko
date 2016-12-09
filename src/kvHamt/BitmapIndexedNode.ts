@@ -4,6 +4,15 @@ import { spliceIn, replaceValue, spliceOut } from '../util/array'
 import { maskHash, indexBitOnBitmap } from '../util/bitmap'
 import ValueNode from './ValueNode'
 
+let EMPTY_NODE: BitmapIndexedNode<any>
+export function emptyNode<T>(): BitmapIndexedNode<T> {
+  if (!EMPTY_NODE) {
+    EMPTY_NODE = new BitmapIndexedNode<any>(0, 0, 0, [])
+  }
+
+  return EMPTY_NODE as BitmapIndexedNode<T>
+}
+
 export default class BitmapIndexedNode<T> {
   level: number // NOTE: This should be the parent's level plus one
   size: number

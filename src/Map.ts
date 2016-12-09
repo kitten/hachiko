@@ -1,8 +1,9 @@
 import { KVKey, KVTuple, Predicate, Transform, Updater, Option } from './constants'
 import hash from './util/hash'
-import BitmapIndexedNode from './kvHamt/BitmapIndexedNode'
+import BitmapIndexedNode, { emptyNode } from './kvHamt/BitmapIndexedNode'
 import Iterable from './Iterable'
 import IteratorSymbol from './util/iteratorSymbol'
+import iterate from './util/iterate'
 
 import {
   KeyIterator,
@@ -14,14 +15,14 @@ let EMPTY_MAP: Map<any>
 function emptyMap<T>(): Map<T> {
   if (!EMPTY_MAP) {
     EMPTY_MAP = Object.create(Map.prototype)
-    EMPTY_MAP.root = new BitmapIndexedNode(0, 0, 0, [])
+    EMPTY_MAP.root = emptyNode<T>()
     EMPTY_MAP.size = 0
   }
 
   return EMPTY_MAP as Map<T>
 }
 
-function makeMap<T>(root: BitmapIndexedNode<T>, forceCreation?: boolean): Map<T> {
+function makeMap<T>(root: BitmapIndexedNode<T>, forceCreation = false): Map<T> {
   if (
     !forceCreation &&
     root.size === 0
@@ -41,9 +42,17 @@ export default class Map<T> extends Iterable<T> {
   size: number
   owner?: Object
 
-  constructor() {
+  constructor(input: any) {
     super()
-    return emptyMap<T>()
+
+    let root = emptyNode<T>()
+
+    const owner = {}
+    iterate<T>(input, (val, key) => {
+      root = root.set(hash(key), key, val, owner)
+    })
+
+    return makeMap<T>(root)
   }
 
   get(key: KVKey, notSetVal?: T): Option<T> {
