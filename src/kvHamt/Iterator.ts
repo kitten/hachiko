@@ -25,9 +25,10 @@ export class IteratorContext<T> {
 
   unwrap(): Option<IteratorContext<T>> {
     const { prev } = this
-    if (!prev) {
-      return undefined
-    } else if (prev.index < (prev.node as BitmapIndexedNode<T>).content.length - 1) {
+    if (
+      !prev ||
+      prev.index < (prev.node as BitmapIndexedNode<T>).content.length - 1
+    ) {
       return prev
     }
 
@@ -37,7 +38,7 @@ export class IteratorContext<T> {
   advance(): Option<IteratorContext<T>> {
     const unwrapped = this.unwrap()
     if (!unwrapped) {
-      return undefined
+      return unwrapped
     }
 
     const index = unwrapped.index + 1
@@ -54,7 +55,7 @@ export interface IteratorResult<T> {
 }
 
 export abstract class Iterator<T, R> {
-  context?: IteratorContext<T>
+  context: IteratorContext<T>
 
   constructor(root: Node<T>) {
     this.context = new IteratorContext<T>(root)
@@ -68,29 +69,34 @@ export abstract class Iterator<T, R> {
       return { done: true }
     }
 
-    let key: KVKey
-    let value: T
+    const { node, index } = context
 
-    if (context.node.constructor === ValueNode) {
-      const node = context.node as ValueNode<T>
-      key = node.key
-      value = node.value
+    if (node.constructor === ValueNode) {
+      this.context = context.advance() as IteratorContext<T>
+      const done = !this.context
 
-      this.context = context.advance()
-    } else {
-      const node = context.node as CollisionNode<T>
-      value = node.values[context.index]
-      key = node.keys[context.index]
-
-      context.index = context.index + 1
-      if (context.index >= node.values.length) {
-        this.context = context.advance()
+      return {
+        value: this.__transform(
+          (node as ValueNode<T>).key,
+          (node as ValueNode<T>).value
+        ),
+        done
       }
     }
 
+    const { values, keys } = (node as CollisionNode<T>)
+    const nextIndex = index + 1
+    context.index = nextIndex
+
+    let done = false
+    if (nextIndex >= values.length) {
+      this.context = context.advance() as IteratorContext<T>
+      done = !this.context
+    }
+
     return {
-      value: this.__transform(key, value),
-      done: false
+      value: this.__transform(keys[index], values[index]),
+      done
     }
   }
 
