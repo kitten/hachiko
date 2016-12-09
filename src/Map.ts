@@ -1,4 +1,4 @@
-import { KVKey, KVTuple, Predicate, Transform, Updater, Option } from './constants'
+import { KVKey, Predicate, Transform, Updater, Option } from './constants'
 import hash from './util/hash'
 import BitmapIndexedNode, { emptyNode } from './kvHamt/BitmapIndexedNode'
 import Iterable from './Iterable'
