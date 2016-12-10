@@ -113,10 +113,6 @@ export default class BitmapIndexedNode<T> {
     const contentIndex = indexBitOnBitmap(this.bitmap, positionBitmap)
     const oldNode = this.content[contentIndex]
 
-    if (!oldNode) {
-      console.log(this.content)
-    }
-
     const node: Option<Node<T>> = oldNode.delete(hashCode, key, owner)
     if (node === oldNode) {
       return this
