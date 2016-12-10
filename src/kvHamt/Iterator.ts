@@ -1,4 +1,4 @@
-import { KVKey, KVTuple, Option } from '../constants'
+import { KVKey, KVTuple } from '../constants'
 import Node from './Node'
 import ValueNode from './ValueNode'
 import CollisionNode from './CollisionNode'
@@ -14,38 +14,6 @@ export class IteratorContext<T> {
     this.node = node
     this.prev = prev
     this.index = 0
-
-    if (node.constructor !== BitmapIndexedNode) {
-      return this
-    }
-
-    const subNode = (node as BitmapIndexedNode<T>).content[0]
-    return new IteratorContext<T>(subNode, this)
-  }
-
-  unwrap(): Option<IteratorContext<T>> {
-    const { prev } = this
-    if (
-      !prev ||
-      prev.index < (prev.node as BitmapIndexedNode<T>).content.length - 1
-    ) {
-      return prev
-    }
-
-    return prev.unwrap()
-  }
-
-  advance(): Option<IteratorContext<T>> {
-    const unwrapped = this.unwrap()
-    if (!unwrapped) {
-      return unwrapped
-    }
-
-    const index = unwrapped.index + 1
-    const node = (unwrapped.node as BitmapIndexedNode<T>).content[index]
-
-    unwrapped.index = index
-    return new IteratorContext<T>(node, unwrapped)
   }
 }
 
@@ -55,49 +23,55 @@ export interface IteratorResult<T> {
 }
 
 export abstract class Iterator<T, R> {
-  context: IteratorContext<T>
+  context?: IteratorContext<T>
 
   constructor(root: Node<T>) {
-    this.context = new IteratorContext<T>(root)
+    this.context = root && new IteratorContext<T>(root)
   }
 
-  abstract __transform(key: KVKey, value: T): R
+  abstract __transform(key: KVKey, value: T): IteratorResult<R>
 
+  // See: https://github.com/facebook/immutable-js/blob/master/src/Map.js#L569
   next(): IteratorResult<R> {
-    const { context } = this
-    if (!context) {
-      return { done: true }
-    }
+    let { context } = this
 
-    const { node, index } = context
+    while (context) {
+      const node = context.node
+      const index = context.index++
 
-    if (node.constructor === ValueNode) {
-      this.context = context.advance() as IteratorContext<T>
-      const done = !this.context
+      if (node.constructor === ValueNode) {
+        if (index === 0) {
+          const { key, value } = node as ValueNode<T>
+          return this.__transform(key, value)
+        }
+      } else if (node.constructor === CollisionNode) {
+        const { keys, values } = node as CollisionNode<T>
+        const maxIndex = keys.length - 1
+        if (index <= maxIndex) {
+          return this.__transform(keys[index], values[index])
+        }
+      } else {
+        const { content } = node as BitmapIndexedNode<T>
+        const maxIndex = content.length - 1
+        if (index <= maxIndex) {
+          const subNode = content[index]
+          if (subNode) {
+            if (subNode.constructor === ValueNode) {
+              const { key, value } = subNode as ValueNode<T>
+              return this.__transform(key, value)
+            }
 
-      return {
-        value: this.__transform(
-          (node as ValueNode<T>).key,
-          (node as ValueNode<T>).value
-        ),
-        done
+            context = this.context = new IteratorContext<T>(subNode, context)
+          }
+
+          continue
+        }
       }
+
+      context = this.context = (this.context as IteratorContext<T>).prev
     }
 
-    const { values, keys } = (node as CollisionNode<T>)
-    const nextIndex = index + 1
-    context.index = nextIndex
-
-    let done = false
-    if (nextIndex >= values.length) {
-      this.context = context.advance() as IteratorContext<T>
-      done = !this.context
-    }
-
-    return {
-      value: this.__transform(keys[index], values[index]),
-      done
-    }
+    return { done: true }
   }
 
   [IterableSymbol](): this {
@@ -106,19 +80,28 @@ export abstract class Iterator<T, R> {
 }
 
 export class KeyIterator<T> extends Iterator<T, KVKey> {
-  __transform(key: KVKey, value: T): KVKey {
-    return key
+  __transform(key: KVKey, value: T): IteratorResult<KVKey> {
+    return {
+      value: key,
+      done: false
+    }
   }
 }
 
 export class ValueIterator<T> extends Iterator<T, T> {
-  __transform(key: KVKey, value: T): T {
-    return value
+  __transform(key: KVKey, value: T): IteratorResult<T> {
+    return {
+      value: value,
+      done: false
+    }
   }
 }
 
 export class EntryIterator<T> extends Iterator<T, KVTuple<T>> {
-  __transform(key: KVKey, value: T): KVTuple<T> {
-    return [ key, value ]
+  __transform(key: KVKey, value: T): IteratorResult<KVTuple<T>> {
+    return {
+      value: [ key, value ],
+      done: false
+    }
   }
 }
