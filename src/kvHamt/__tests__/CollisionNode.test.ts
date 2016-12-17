@@ -54,12 +54,14 @@ describe('CollisionNode', () => {
       expect(result.values[2]).toBe(newValue)
     })
 
-    it('should assign owner when it\'s being passed', () => {
+    it('should mutate in place if owner matches', () => {
       const owner = {}
-      const result = node.set(0x11111, 0x22222, 42, owner) as CollisionNode<number>
+      const first = new CollisionNode<number>(0, hashCode, keys, values, owner)
+      const second = first.set(0x11111, 0x22222, 42, owner) as CollisionNode<number>
 
-      expect(result).toBeInstanceOf(CollisionNode)
-      expect(result.owner).toBe(owner)
+      expect(second).toBeInstanceOf(CollisionNode)
+      expect(second).toBe(first)
+      expect(second.owner).toBe(owner)
     })
 
     it('should overwrite tuple on CollectionNode when hashCodes and keys match', () => {
@@ -134,12 +136,13 @@ describe('CollisionNode', () => {
       expect(res.get(1)).toBe(undefined)
     })
 
-    it('should assign owner when it\'s being passed', () => {
-      const sizeThree = new CollisionNode<number>(0, 1, [ 1, 2, 3 ], [ 1, 2, 3 ])
+    it('should mutate in place if owner matches', () => {
       const owner = {}
+      const sizeThree = new CollisionNode<number>(0, 1, [ 1, 2, 3 ], [ 1, 2, 3 ], owner)
       const res = sizeThree.delete(1, 1, owner) as CollisionNode<number>
 
       expect(res).toBeInstanceOf(CollisionNode)
+      expect(res).toBe(sizeThree)
       expect(res.owner).toBe(owner)
     })
   })
@@ -154,11 +157,14 @@ describe('CollisionNode', () => {
       expect(res.values[0]).toBe(node.values[0].toString())
     })
 
-    it('should assign owner when it\'s being passed', () => {
+    it('should mutate in place if owner matches', () => {
       const owner = {}
-      const res = node.map(x => x.toString(), owner)
+      const first = new CollisionNode<number>(1, 2, keys, values, owner)
+      const res = first.map(x => x.toString(), owner)
 
-      expect(res.size).toBe(node.size)
+      expect(res).toBeInstanceOf(CollisionNode)
+      expect(res.size).toBe(first.size)
+      expect(res).toBe(first)
       expect(res.owner).toBe(owner)
     })
   })
@@ -196,7 +202,7 @@ describe('CollisionNode', () => {
       const keys = []
       const values = []
 
-      node.iterate((value, key) => {
+      node.iterateReverse((value, key) => {
         keys.push(key)
         values.push(value)
       })
@@ -205,12 +211,14 @@ describe('CollisionNode', () => {
       expect(keys.length).toBe(node.keys.length)
       expect(values.length).toBe(node.values.length)
 
-      for (let i = node.keys.length - 1; i >= 0; i--) {
-        expect(keys[i]).toBe(node.keys[i])
+      const length = node.keys.length
+
+      for (let i = 0; i < length; i++) {
+        expect(keys[i]).toBe(node.keys[length - 1 - i])
       }
 
-      for (let i = node.values.length - 1; i >= 0; i--) {
-        expect(values[i]).toBe(node.values[i])
+      for (let i = 0; i < length; i++) {
+        expect(values[i]).toBe(node.values[length - 1 - i])
       }
     })
   })

@@ -162,7 +162,7 @@ export default class CollisionNode<T> {
   }
 
   iterateReverse(step: Predicate<T>) {
-    for (let i = this.keys.length; i >= 0; i--) {
+    for (let i = this.keys.length - 1; i >= 0; i--) {
       const key = this.keys[i]
       const value = this.values[i]
 

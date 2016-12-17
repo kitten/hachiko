@@ -150,7 +150,7 @@ describe('ValueNode', () => {
     it('calls predicate using value and key', () => {
       const predicate = jest.fn()
       const node = new ValueNode<number>(0, 1, 1, 1)
-      node.iterate(predicate)
+      node.iterateReverse(predicate)
 
       expect(predicate).toHaveBeenCalledTimes(1)
       expect(predicate).toHaveBeenCalledWith(1, 1)
