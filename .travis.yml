@@ -11,9 +11,9 @@ install:
 script:
   - yarn run build
   - yarn run lint
-  - yarn run test
+  - yarn run test:cov
 after_success:
-  - npm run test:cov
+  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
 cache:
   directories:
     - $HOME/.yarn-cache
