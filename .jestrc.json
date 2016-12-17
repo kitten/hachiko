@@ -1,8 +1,9 @@
 {
   "testEnvironment": "node",
   "transform": {
-    ".ts": "<rootDir>/scripts/jest-preprocessor.js"
+    ".ts": "<rootDir>/node_modules/ts-jest/preprocessor.js"
   },
+  "testResultsProcessor": "<rootDir>/node_modules/ts-jest/coverageprocessor.js",
   "moduleFileExtensions": [
     "ts",
     "js"
