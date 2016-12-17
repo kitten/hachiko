@@ -55,6 +55,10 @@ export default class Map<T> extends Iterable<T> {
     return makeMap<T>(root)
   }
 
+  static isMap(object: any) {
+    return object && object instanceof Map
+  }
+
   get(key: KVKey, notSetVal?: T): Option<T> {
     return this.root.get(hash(key), key, notSetVal)
   }
