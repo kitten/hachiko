@@ -1,4 +1,4 @@
-<p align="center"><img src="https://raw.githubusercontent.com/philpl/hachiko/master/docs/logo.gif" width=400></p>
+<p align="center"><img src="https://raw.githubusercontent.com/philpl/hachiko/master/docs/logo.gif" width=250></p>
 <h2 align="center">Hachiko</h2>
 <p align="center">
 <strong>Modular and performant data collections for JavaScript</strong>
