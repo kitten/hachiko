@@ -25,7 +25,7 @@
     "preversion": "npm run clean && npm run test",
     "version": "npm run build",
     "postversion": "git push && git push --tags",
-    "doc": "typedoc --out docs --module commonjs --excludeExternals --excludePrivate --exclude **/*.test.ts src"
+    "doc": "typedoc --out book --module commonjs --excludeExternals --excludePrivate --exclude **/*.test.ts src"
   },
   "author": "Phil Plückthun <phil@plckthn.me> (https://github.com/philpl)",
   "bugs": {

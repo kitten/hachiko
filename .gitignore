@@ -8,7 +8,6 @@ npm-debug.log
 coverage/
 _book/
 ./*.js
-docs/
 
 # Mac
 .DS_Store
