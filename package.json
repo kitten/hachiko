@@ -15,7 +15,7 @@
   "scripts": {
     "test": "BABEL_ENV=cjs jest --config .jestrc.json",
     "test:watch": "npm test -- --watch",
-    "test:cov": "npm test -- --coverage",
+    "test:cov": "npm test -- --coverage --no-cache",
     "lint": "tslint -c tslint.json src/**/*.ts",
     "clean": "rm -rf es lib",
     "build:es": "tsc -m es2015 --outDir es",
