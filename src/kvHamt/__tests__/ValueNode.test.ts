@@ -86,5 +86,96 @@ describe('ValueNode', () => {
       const bIndex = indexBitOnBitmap(result.bitmap, maskHash(hashCode, 0))
       expect(bIndex).toBe(1)
     })
+
+    it('should assign owner when it\'s being passed', () => {
+      const owner = {}
+      const res = node.set(hashCode, key, 'newValue', owner)
+
+      expect(res).not.toBe(node)
+      expect(res.value).toBe('newValue')
+      expect(res.owner).toBe(owner)
+    })
+  })
+
+  describe('delete', () => {
+    const hashCode = 0x11111
+    const key = 'key'
+    const value = 'value'
+
+    const node = new ValueNode<string>(0, hashCode, key, value)
+
+    it('returns undefined when keys match (hit)', () => {
+      const res = node.delete(hashCode, key)
+      expect(res).toBe(undefined)
+    })
+
+    it('returns unchanged node when keys don\'t match (miss)', () => {
+      const res = node.delete(123, 123)
+      expect(res).toBe(node)
+    })
+  })
+
+  describe('map', () => {
+    it('should transform value using transformer function', () => {
+      const node = new ValueNode<number>(0, 1, 1, 1)
+      const res = node.map(x => x.toString())
+
+      expect(res).toBeInstanceOf(ValueNode)
+      expect(res.key).toBe(node.key)
+      expect(res.value).toBe(node.value.toString())
+    })
+
+    it('should assign owner when it\'s being passed', () => {
+      const owner = {}
+      const node = new ValueNode<number>(0, 1, 1, 1)
+      const res = node.map(x => x.toString(), owner)
+
+      expect(res).not.toBe(node)
+      expect(res.owner).toBe(owner)
+    })
+  })
+
+  describe('iterate', () => {
+    it('calls predicate using value and key', () => {
+      const predicate = jest.fn()
+      const node = new ValueNode<number>(0, 1, 1, 1)
+      node.iterate(predicate)
+
+      expect(predicate).toHaveBeenCalledTimes(1)
+      expect(predicate).toHaveBeenCalledWith(1, 1)
+    })
+  })
+
+  describe('iterateReverse', () => {
+    it('calls predicate using value and key', () => {
+      const predicate = jest.fn()
+      const node = new ValueNode<number>(0, 1, 1, 1)
+      node.iterate(predicate)
+
+      expect(predicate).toHaveBeenCalledTimes(1)
+      expect(predicate).toHaveBeenCalledWith(1, 1)
+    })
+  })
+
+  describe('clone', () => {
+    const node = new ValueNode<number>(0, 1, 1, 1)
+
+    it('clones the node', () => {
+      const res = node.clone()
+
+      expect(node).not.toBe(res)
+      expect(node.level).toBe(res.level)
+      expect(node.hashCode).toBe(res.hashCode)
+      expect(node.key).toBe(res.key)
+      expect(node.value).toBe(res.value)
+      expect(node.size).toBe(res.size)
+    })
+
+    it('should assign owner when it\'s being passed', () => {
+      const owner = {}
+      const res = node.clone(owner)
+      expect(res).not.toBe(node)
+      expect(res.owner).toBe(owner)
+    })
   })
 })
