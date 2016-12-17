@@ -61,4 +61,49 @@ describe('BitmapIndexedNode', () => {
       expect(result.content[1]).toBeInstanceOf(BitmapIndexedNode)
     })
   })
+
+  describe('delete', () => {
+    const node = new BitmapIndexedNode<number>(0, content.length, bitmap, content)
+
+    it('should return unchanged node if hashCode fragment is not on the node', () => {
+      const res = node.delete(123, 123, 123)
+      expect(res).toBe(node)
+    })
+
+    it('should return unchanged node if subnode hasn\'t changed', () => {
+      const res = node.delete(1, 123)
+      expect(res).toBe(node)
+    })
+
+    it('should return remaining node if subnode of length 2 is deleted on', () => {
+      const subNode = new BitmapIndexedNode(1, 0, 0, [])
+        .set(0x11111, 33, 33)
+        .set(0x22222, 34, 34)
+
+      const res = subNode.delete(0x11111, 33)
+      expect(res).toBeInstanceOf(ValueNode)
+      expect(res.level).toBe(subNode.level)
+    })
+
+    it('should return undefined if subnode of length 1 is deleted on', () => {
+      const subNode = new BitmapIndexedNode(1, 0, 0, [])
+        .set(0x22222, 34, 34)
+
+      const res = subNode.delete(0x22222, 34)
+
+      expect(res).toBe(undefined)
+    })
+
+    it('should return changed node if subnode is modified due to a deletion', () => {
+      const subNode = new BitmapIndexedNode(1, 0, 0, [])
+        .set(0x22222, 34, 34)
+        .set(0x22222, 35, 35)
+
+      const res = subNode.delete(0x22222, 35, 35)
+
+      expect(res).toBeInstanceOf(BitmapIndexedNode)
+      expect(res).not.toBe(subNode)
+      expect(res.content[0]).toBeInstanceOf(ValueNode)
+    })
+  })
 })
