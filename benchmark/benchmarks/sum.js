@@ -34,17 +34,6 @@ module.exports.benchmarks['Native Map'] = keys => {
     };
 };
 
-module.exports.benchmarks['Hashtrie'] = keys => {
-    const add = function(p, x) {
-        return p + x;
-    };
-
-    const h = api.hashtrieFrom(keys);
-    return function() {
-        ht.fold(add, 0, h);
-    };
-};
-
 module.exports.benchmarks['Hamt'] = keys => {
     const add = function(p, x) {
         return p + x;
