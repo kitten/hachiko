@@ -193,6 +193,12 @@ describe('CollisionNode', () => {
         expect(values[i]).toBe(node.values[i])
       }
     })
+
+    it('cancels iteration if the predicate returns true', () => {
+      const predicate = jest.fn(() => true)
+      node.iterate(predicate)
+      expect(predicate).toHaveBeenCalledTimes(1)
+    })
   })
 
   describe('iterateReverse', () => {
@@ -220,6 +226,12 @@ describe('CollisionNode', () => {
       for (let i = 0; i < length; i++) {
         expect(values[i]).toBe(node.values[length - 1 - i])
       }
+    })
+
+    it('cancels iteration if the predicate returns true', () => {
+      const predicate = jest.fn(() => true)
+      node.iterateReverse(predicate)
+      expect(predicate).toHaveBeenCalledTimes(1)
     })
   })
 
