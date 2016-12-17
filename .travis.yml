@@ -13,7 +13,7 @@ script:
   - yarn run lint
   - yarn run test:cov
 after_success:
-  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+  - cat ./coverage/remapped/lcov.info | ./node_modules/coveralls/bin/coveralls.js
 cache:
   directories:
     - $HOME/.yarn-cache
