@@ -26,9 +26,10 @@ export const find = <T>(
 export const findEntry = <T>(
   iter: Iterable<T>,
   reverse: boolean,
-  predicate: Predicate<T>
-): Option<KVTuple<T>> => {
-  let result: Option<KVTuple<T>>
+  predicate: Predicate<T>,
+  notSetValue?: T
+): Option<KVTuple<T> | T> => {
+  let result: Option<KVTuple<T> | T> = notSetValue
 
   iter.__iterate(
     (value: T, key: KVKey) => {
