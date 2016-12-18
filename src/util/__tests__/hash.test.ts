@@ -62,4 +62,16 @@ describe('hash', () => {
     expect(secondHash).toBe(hash(second))
     expect(firstHash).not.toBe(secondHash)
   })
+
+  it('throws if hash cannot be generated', () => {
+    function input() {
+      return undefined
+    }
+
+    input.toString = undefined
+
+    expect(() => {
+      hash(input)
+    }).toThrow()
+  })
 })
