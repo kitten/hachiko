@@ -118,4 +118,112 @@ describe('BitmapIndexedNode', () => {
       expect(res).toBe(subNode.content[1])
     })
   })
+
+  describe('map', () => {
+    const owner = {}
+    const mockMap = jest.fn(() => ({}))
+    const mockContent = [{
+      map: mockMap
+    }]
+
+    const node = new BitmapIndexedNode<number>(0, mockContent.length, 1, mockContent, owner)
+
+    it('transforms subnodes by recursively calling map on them', () => {
+      const transform = x => x
+      const res = node.map(transform)
+
+      expect(res).toBeInstanceOf(BitmapIndexedNode)
+      expect(res).not.toBe(node)
+      expect(mockMap).toHaveBeenCalledWith(transform, undefined)
+    })
+
+    it('modifies node in place if owner matches', () => {
+      const transform = x => x
+      const res = node.map(transform, owner)
+
+      expect(res).toBeInstanceOf(BitmapIndexedNode)
+      expect(res).toBe(node)
+      expect(mockMap).toHaveBeenCalledWith(transform, owner)
+    })
+  })
+
+  describe('iterate', () => {
+    it('calls iterate on all subnodes', () => {
+      const mockIterate1 = jest.fn(() => ({}))
+      const mockIterate2 = jest.fn(() => ({}))
+
+      const mockContent = [{ iterate: mockIterate1 }, { iterate: mockIterate2 }]
+      const node = new BitmapIndexedNode<number>(0, mockContent.length, 1, mockContent)
+
+      const step = x => x
+      node.iterate(step)
+
+      expect(mockIterate1).toHaveBeenCalledWith(step)
+      expect(mockIterate2).toHaveBeenCalledWith(step)
+    })
+
+    it('calls iterate on all subnodes until step returns true', () => {
+      const mockIterate1 = jest.fn(() => true)
+      const mockIterate2 = jest.fn(() => ({}))
+
+      const mockContent = [{ iterate: mockIterate1 }, { iterate: mockIterate2 }]
+      const node = new BitmapIndexedNode<number>(0, mockContent.length, 1, mockContent)
+
+      const step = x => x
+      node.iterate(step)
+
+      expect(mockIterate1).toHaveBeenCalledWith(step)
+      expect(mockIterate2).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('iterateReverse', () => {
+    it('calls iterateReverse on all subnodes', () => {
+      const mockIterate1 = jest.fn(() => ({}))
+      const mockIterate2 = jest.fn(() => ({}))
+
+      const mockContent = [{ iterateReverse: mockIterate1 }, { iterateReverse: mockIterate2 }]
+      const node = new BitmapIndexedNode<number>(0, mockContent.length, 1, mockContent)
+
+      const step = x => x
+      node.iterateReverse(step)
+
+      expect(mockIterate2).toHaveBeenCalledWith(step)
+      expect(mockIterate1).toHaveBeenCalledWith(step)
+    })
+
+    it('calls iterate on all subnodes in reverse until step returns true', () => {
+      const mockIterate1 = jest.fn(() => ({}))
+      const mockIterate2 = jest.fn(() => true)
+
+      const mockContent = [{ iterateReverse: mockIterate1 }, { iterateReverse: mockIterate2 }]
+      const node = new BitmapIndexedNode<number>(0, mockContent.length, 1, mockContent)
+
+      const step = x => x
+      node.iterateReverse(step)
+
+      expect(mockIterate1).not.toHaveBeenCalled()
+      expect(mockIterate2).toHaveBeenCalledWith(step)
+    })
+  })
+
+  describe('clone', () => {
+    const node = new BitmapIndexedNode<number>(0, content.length, bitmap, content)
+
+    it('clones the node', () => {
+      const res = node.clone()
+
+      expect(node).not.toBe(res)
+      expect(node.level).toBe(res.level)
+      expect(node.hashCode).toBe(res.hashCode)
+      expect(node.content).toBe(res.content)
+      expect(node.size).toBe(res.size)
+    })
+
+    it('should assign owner when it\'s being passed', () => {
+      const owner = {}
+      const res = node.clone(owner)
+      expect(res.owner).toBe(owner)
+    })
+  })
 })
