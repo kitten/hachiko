@@ -33,7 +33,6 @@ function makeMap<T>(root: BitmapIndexedNode<T>, forceCreation = false): Map<T> {
   const res = Object.create(Map.prototype)
   res.root = root
   res.size = root.size
-  res.owner = root.owner
   return res
 }
 

@@ -7,7 +7,19 @@ describe('Map', () => {
 
   describe('constructor', () => {
     it('should instantiate a Map from an object', () => {
-      expect(new Map(obj).size).toBe(2)
+      const res = new Map(obj)
+      expect(res.size).toBe(2)
+      expect(res.owner).toBe(undefined)
+    })
+
+    it('should return the empty Map reference when it yields an empty Map', () => {
+      const empty = new Map()
+
+      const test = new Map({})
+      expect(test.size).toBe(0)
+      expect(test).toBe(empty)
+
+      expect(new Map()).toBe(empty)
     })
   })
 
