@@ -116,47 +116,75 @@ describe('Map', () => {
   })
 
   describe('values', () => {
-    it('should return the values of the structure', () => {
+    it('should return an iterator for the values of the structure', () => {
       const valuesIterator = new Map(obj).values()
-      const keys = Object.keys(obj)
+      const values = Object.keys(obj).map(key => obj[key])
 
+      let done = false
       let i = 0
-      for (const value of valuesIterator) {
-        const val = obj[keys[i]]
-        expect(value).toBe(val)
+
+      while (!done) {
+        const { value, done: _done } = valuesIterator.next()
+        done = _done
+
+        if (value) {
+          expect(values.includes(value)).toBeTruthy()
+        }
+
         i++
       }
+
+      expect(i).toBe(3)
     })
   })
 
   describe('keys', () => {
-    it('should return the keys of the structure', () => {
+    it('should return an iterator for the keys of the structure', () => {
       const keysIterator = new Map(obj).keys()
       const keys = Object.keys(obj)
 
+      let done = false
       let i = 0
-      for (const key of keysIterator) {
-        const k = keys[i]
-        expect(key).toBe(k)
+
+      while (!done) {
+        const { value, done: _done } = keysIterator.next()
+        done = _done
+
+        if (value) {
+          expect(keys.includes(value)).toBeTruthy()
+        }
+
         i++
       }
+
+      expect(i).toBe(3)
     })
   })
 
   describe('entries', () => {
-    it('should return the entries of the structure', () => {
-      const entriesIterator = new Map(obj).entries()
+    it('should return an iterator for the entries of the structure', () => {
+      const keysIterator = new Map(obj).entries()
       const keys = Object.keys(obj)
+      const values = Object.keys(obj).map(key => obj[key])
 
+      let done = false
       let i = 0
-      for (const [key, value] of entriesIterator) {
-        const k = keys[i]
-        const val = obj[k]
 
-        expect(key).toBe(k)
-        expect(value).toBe(val)
+      while (!done) {
+        const { value, done: _done } = keysIterator.next()
+        done = _done
+
+        if (value) {
+          expect(keys.includes(value[0])).toBeTruthy()
+          expect(values.includes(value[1])).toBeTruthy()
+        }
+
         i++
       }
+
+      expect(i).toBe(3)
     })
   })
+
+
 })
