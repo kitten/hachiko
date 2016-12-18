@@ -31,7 +31,6 @@ export abstract class Iterator<T, R> {
 
   abstract __transform(key: KVKey, value: T): IteratorResult<R>
 
-  // See: https://github.com/facebook/immutable-js/blob/master/src/Map.js#L569
   next(): IteratorResult<R> {
     let { context } = this
 
@@ -39,12 +38,7 @@ export abstract class Iterator<T, R> {
       const node = context.node
       const index = context.index++
 
-      if (node.constructor === ValueNode) {
-        if (index === 0) {
-          const { key, value } = node as ValueNode<T>
-          return this.__transform(key, value)
-        }
-      } else if (node.constructor === CollisionNode) {
+      if (node.constructor === CollisionNode) {
         const { keys, values } = node as CollisionNode<T>
         const maxIndex = keys.length - 1
         if (index <= maxIndex) {
@@ -55,15 +49,12 @@ export abstract class Iterator<T, R> {
         const maxIndex = content.length - 1
         if (index <= maxIndex) {
           const subNode = content[index]
-          if (subNode) {
-            if (subNode.constructor === ValueNode) {
-              const { key, value } = subNode as ValueNode<T>
-              return this.__transform(key, value)
-            }
-
-            context = this.context = new IteratorContext<T>(subNode, context)
+          if (subNode.constructor === ValueNode) {
+            const { key, value } = subNode as ValueNode<T>
+            return this.__transform(key, value)
           }
 
+          context = this.context = new IteratorContext<T>(subNode, context)
           continue
         }
       }

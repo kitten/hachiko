@@ -2,6 +2,7 @@ import { KeyIterator, ValueIterator, EntryIterator } from '../Iterator'
 import BitmapIndexedNode from '../BitmapIndexedNode'
 import ValueNode from '../ValueNode'
 import CollisionNode from '../CollisionNode'
+import IteratorSymbol from '../../util/iteratorSymbol'
 
 describe('Iterator', () => {
   const root = new BitmapIndexedNode(0, 3, 0, [
@@ -30,6 +31,13 @@ describe('Iterator', () => {
     const val4 = iterator.next()
     expect(val4.value).toBe(undefined)
     expect(val4.done).toBeTruthy()
+  })
+
+  describe('@@iterator', () => {
+    it('returns itself', () => {
+      const iterator = new KeyIterator(root)
+      expect(iterator[IteratorSymbol]()).toBe(iterator)
+    })
   })
 
   describe('KeyIterator', () => {
