@@ -194,18 +194,38 @@ describe('Iterable', () => {
   })
 
   describe('merge', () => {
-    const res = new Map(obj).merge({ a: 'a' }, new Map({ b: 'b' }))
+    it('merges objects and iterables', () => {
+      const res = new Map(obj).merge({ a: 'a' }, new Map({ b: 'b' }))
 
-    expect(res.size).toBe(4)
-    expect(res.get('a')).toBe('a')
-    expect(res.get('b')).toBe('b')
+      expect(res.size).toBe(4)
+      expect(res.get('a')).toBe('a')
+      expect(res.get('b')).toBe('b')
+    })
+
+    it('returns unchanged iterable if nothing is passed', () => {
+      const iter = new Map(obj)
+      const res = iter.merge()
+
+      expect(iter).toBe(res)
+    })
   })
 
   describe('mergeWith', () => {
     const merger = (prev, value) => prev + value
-    const res = new Map(obj).mergeWith(merger, { firstName: 'Test' })
 
-    expect(res.size).toBe(2)
-    expect(res.get('firstName')).toBe('UnameTest')
+    it('merges objects and iterables and resolves conflicts with the merger', () => {
+      const res = new Map(obj).mergeWith(merger, { firstName: 'Test' }, new Map({ lastName: 'Test' }))
+
+      expect(res.size).toBe(2)
+      expect(res.get('firstName')).toBe('UnameTest')
+      expect(res.get('lastName')).toBe('SUnameTest')
+    })
+
+    it('returns unchanged iterable if nothing is passed', () => {
+      const iter = new Map(obj)
+      const res = iter.mergeWith(merger)
+
+      expect(iter).toBe(res)
+    })
   })
 })
