@@ -75,7 +75,7 @@ describe('BitmapIndexedNode', () => {
       expect(res).toBe(node)
     })
 
-    it('should return remaining node if subnode of length 2 is deleted on', () => {
+    it('should return remaining subnode if node of length 2 is deleted on', () => {
       const subNode = new BitmapIndexedNode(1, 0, 0, [])
         .set(0x11111, 33, 33)
         .set(0x22222, 34, 34)
@@ -99,11 +99,23 @@ describe('BitmapIndexedNode', () => {
         .set(0x22222, 34, 34)
         .set(0x22222, 35, 35)
 
-      const res = subNode.delete(0x22222, 35, 35)
+      const res = subNode.delete(0x22222, 35)
 
       expect(res).toBeInstanceOf(BitmapIndexedNode)
       expect(res).not.toBe(subNode)
       expect(res.content[0]).toBeInstanceOf(ValueNode)
+    })
+
+    it('should mutate and return subnode directly if it\'s of the same owner', () => {
+      const owner = {}
+      const subNode = new BitmapIndexedNode(1, 0, 0, [], owner)
+        .set(0x11111, 33, 33, owner)
+        .set(0x22222, 34, 34, owner)
+
+      const res = subNode.delete(0x11111, 33, owner)
+
+      expect(res).toBeInstanceOf(ValueNode)
+      expect(res).toBe(subNode.content[1])
     })
   })
 })
