@@ -41,11 +41,11 @@ abstract class Iterable<T> {
     })
   }
 
-  merge(iterables: (Dict<T>[] | Iterable<T>[])): Iterable<T> {
+  merge(...iterables: (Dict<T> | Iterable<T>)[]): Iterable<T> {
     return merge<T>(this, iterables)
   }
 
-  mergeWith(merger: Merger<T>, iterables: (Dict<T>[] | Iterable<T>[])): Iterable<T> {
+  mergeWith(merger: Merger<T>, ...iterables: (Dict<T> | Iterable<T>)[]): Iterable<T> {
     return mergeWith<T>(this, merger, iterables)
   }
 
@@ -98,19 +98,19 @@ abstract class Iterable<T> {
     return find<T>(this, true, predicate, notSetValue)
   }
 
-  findEntry(predicate: Predicate<T>, notSetValue?: T): Option<KVTuple<T>> {
-    return findEntry<T>(this, false, predicate)
+  findEntry(predicate: Predicate<T>, notSetValue?: T): Option<KVTuple<T> | T> {
+    return findEntry<T>(this, false, predicate, notSetValue)
   }
 
-  findEntryLast(predicate: Predicate<T>, notSetValue?: T): Option<KVTuple<T>> {
-    return findEntry<T>(this, true, predicate)
+  findLastEntry(predicate: Predicate<T>, notSetValue?: T): Option<KVTuple<T> | T> {
+    return findEntry<T>(this, true, predicate, notSetValue)
   }
 
   findKey(predicate: Predicate<T>, notSetValue?: KVKey): Option<KVKey> {
     return findKey<T>(this, false, predicate, notSetValue)
   }
 
-  findKeyLast(predicate: Predicate<T>, notSetValue?: KVKey): Option<KVKey> {
+  findLastKey(predicate: Predicate<T>, notSetValue?: KVKey): Option<KVKey> {
     return findKey<T>(this, true, predicate, notSetValue)
   }
 

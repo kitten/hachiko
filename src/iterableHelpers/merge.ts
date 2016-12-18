@@ -1,21 +1,18 @@
 import Iterable from '../Iterable'
 import { KVKey, Dict, Merger } from '../constants'
 
-export const merge = <T>(iter: Iterable<T>, iterables: (Dict<T>[] | Iterable<T>[])): Iterable<T> => {
+export const merge = <T>(iter: Iterable<T>, iterables: (Dict<T> | Iterable<T>)[]): Iterable<T> => {
   if (!iterables.length) {
     return iter
   }
 
   let mutable = iter.owner ? iter : iter.asMutable()
 
-  // Enforce iterables to be all of same type
-  const isIterables = Iterable.isIterable(iterables[0])
-
   const length = iterables.length
   for (let i = 0; i < length; i++) {
     const iterable = iterables[i]
 
-    if (!isIterables) {
+    if (!Iterable.isIterable(iterable)) {
       const _iterable = (iterable as Dict<T>)
       const keys = Object.keys(_iterable)
       const length = keys.length
@@ -38,7 +35,7 @@ export const merge = <T>(iter: Iterable<T>, iterables: (Dict<T>[] | Iterable<T>[
 export const mergeWith = <T>(
   iter: Iterable<T>,
   merger: Merger<T>,
-  iterables: (Dict<T>[] | Iterable<T>[])
+  iterables: (Dict<T> | Iterable<T>)[]
 ): Iterable<T> => {
   if (!iterables.length) {
     return iter
@@ -46,14 +43,11 @@ export const mergeWith = <T>(
 
   let mutable = iter.owner ? iter : iter.asMutable()
 
-  // Enforce iterables to be all of same type
-  const isIterables = Iterable.isIterable(iterables[0])
-
   const length = iterables.length
   for (let i = 0; i < length; i++) {
     const iterable = iterables[i]
 
-    if (!isIterables) {
+    if (!Iterable.isIterable(iterable)) {
       const _iterable = (iterable as Dict<T>)
       const keys = Object.keys(_iterable)
       const length = keys.length

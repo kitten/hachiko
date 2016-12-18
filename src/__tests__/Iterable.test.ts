@@ -3,8 +3,6 @@ import Iterable from '../Iterable'
 
 describe('Iterable', () => {
   const obj = { firstName: 'Uname', lastName: 'SUname' }
-  const firstKey = Object.keys(obj)[0]
-  const newValue = 'newName'
 
   describe('isIterable', () => {
     it('should return boolean indicating whether input is an instance of Iterable', () => {
@@ -125,5 +123,89 @@ describe('Iterable', () => {
       const inst = new Map(obj)
       expect(inst.last()).toBe('Uname')
     })
+  })
+
+  describe('filter', () => {
+    it('filters out entries that don\'t pass the predicate', () => {
+      const inst = new Map(obj)
+      const res = inst.filter(x => x === 'SUname')
+
+      expect(res.size).toBe(1)
+      expect(res.first()).toBe('SUname')
+    })
+  })
+
+  describe('filterNot', () => {
+    it('filters out entries that pass the predicate', () => {
+      const inst = new Map(obj)
+      const res = inst.filterNot(x => x === 'SUname')
+
+      expect(res.size).toBe(1)
+      expect(res.first()).toBe('Uname')
+    })
+  })
+
+  describe('find', () => {
+    it('returns first value that passes the predicate', () => {
+      expect(new Map(obj).find(x => !!x)).toBe('SUname')
+    })
+
+    it('returns notSetVal if no matching value is found', () => {
+      expect(new Map(obj).find(x => x === 'abc', 'abc')).toBe('abc')
+    })
+  })
+
+  describe('findLast', () => {
+    it('returns last value that passes the predicate', () => {
+      expect(new Map(obj).findLast(x => !!x)).toEqual('Uname')
+    })
+  })
+
+  describe('findEntry', () => {
+    it('returns first entry that passes the predicate', () => {
+      expect(new Map(obj).findEntry(x => !!x)).toEqual([ 'lastName', 'SUname' ])
+    })
+
+    it('returns notSetVal if no matching entry is found', () => {
+      expect(new Map(obj).findEntry(x => x === 'abc', 'abc')).toBe('abc')
+    })
+  })
+
+  describe('findLastEntry', () => {
+    it('returns last value that passes the predicate', () => {
+      expect(new Map(obj).findLastEntry(x => !!x)).toEqual([ 'firstName', 'Uname' ])
+    })
+  })
+
+  describe('findKey', () => {
+    it('returns first key that passes the predicate', () => {
+      expect(new Map(obj).findKey(x => !!x)).toEqual('lastName')
+    })
+
+    it('returns notSetVal if no matching key is found', () => {
+      expect(new Map(obj).findKey(x => x === 'abc', 'abc')).toBe('abc')
+    })
+  })
+
+  describe('findLastKey', () => {
+    it('returns last key that passes the predicate', () => {
+      expect(new Map(obj).findLastKey(x => !!x)).toEqual('firstName')
+    })
+  })
+
+  describe('merge', () => {
+    const res = new Map(obj).merge({ a: 'a' }, new Map({ b: 'b' }))
+
+    expect(res.size).toBe(4)
+    expect(res.get('a')).toBe('a')
+    expect(res.get('b')).toBe('b')
+  })
+
+  describe('mergeWith', () => {
+    const merger = (prev, value) => prev + value
+    const res = new Map(obj).mergeWith(merger, { firstName: 'Test' })
+
+    expect(res.size).toBe(2)
+    expect(res.get('firstName')).toBe('UnameTest')
   })
 })
