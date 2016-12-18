@@ -30,12 +30,6 @@ abstract class Iterable<T> {
   abstract set(key: KVKey, value: T): Iterable<T>
   abstract delete(key: KVKey): Iterable<T>
 
-  withMutations(closure: (x: Iterable<T>) => void) {
-    let mutable = this.asMutable()
-    closure(mutable)
-    return mutable.asImmutable()
-  }
-
   isEmpty(): boolean {
     return !this.size
   }

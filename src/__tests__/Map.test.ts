@@ -25,6 +25,22 @@ describe('Map', () => {
     })
   })
 
+  describe('withMutations', () => {
+    it('should pass a mutable struct to a closure', () => {
+      const instantiatedMap = new Map(obj)
+      const structureNotMutated = instantiatedMap.withMutations((mutableMap) => {
+        mutableMap.set(firstKey, newValue)
+        expect(mutableMap.get(firstKey)).toBe(newValue)
+      })
+
+      expect(
+        structureNotMutated
+          .set(firstKey, obj[firstKey])
+          .get(firstKey)
+      ).not.toBe(newValue)
+    })
+  })
+
   describe('isMap', () => {
     it('should return boolean indicating whether input is an instance of Map', () => {
       expect(Map.isMap(new Map())).toBeTruthy()
