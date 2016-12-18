@@ -141,7 +141,7 @@ abstract class Iterable<T> {
   join(separator = ','): string {
     let result = ''
     this.__iterate((value: T, key: KVKey) => {
-      result = (result ? result : result + separator) + value
+      result = (result ? result + separator : result) + value
       return false
     })
 
@@ -162,13 +162,8 @@ abstract class Iterable<T> {
   }
 
   has(key: KVKey): boolean {
-    return this.__iterate((value: T, _key: KVKey) => {
-      if (key === _key) {
-        return true
-      }
-
-      return false
-    })
+    const NOT_SET = {} as T
+    return this.get(key, NOT_SET) !== NOT_SET
   }
 
   includes(value: T): boolean {

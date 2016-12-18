@@ -174,22 +174,6 @@ describe('Map', () => {
     })
   })
 
-  describe('withMutations', () => {
-    it('should pass a mutable struct to a closure', () => {
-      const instantiatedMap = new Map(obj)
-      const structureNotMutated = instantiatedMap.withMutations((mutableMap) => {
-        mutableMap.set(firstKey, newValue)
-        expect(mutableMap.get(firstKey)).toBe(newValue)
-      })
-
-      expect(
-        structureNotMutated
-          .set(firstKey, obj[firstKey])
-          .get(firstKey)
-      ).not.toBe(newValue)
-    })
-  })
-
   describe('values', () => {
     it('should return an iterator for the values of the structure', () => {
       const valuesIterator = new Map(obj).values()
