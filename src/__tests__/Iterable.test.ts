@@ -228,4 +228,36 @@ describe('Iterable', () => {
       expect(iter).toBe(res)
     })
   })
+
+  describe('reduce', () => {
+    it('reduces all values without an initial value', () => {
+      const iter = new Map(obj)
+      const res = iter.reduce((acc, value) => (acc || '') + value)
+
+      expect(res).toBe('SUnameUname')
+    })
+
+    it('reduces all values with an initial value', () => {
+      const iter = new Map(obj)
+      const res = iter.reduce((acc, value) => acc + value, '')
+
+      expect(res).toBe('SUnameUname')
+    })
+  })
+
+  describe('reduceRight', () => {
+    it('reduces all values without an initial value in reverse order', () => {
+      const iter = new Map(obj)
+      const res = iter.reduceRight((acc, value) => (acc || '') + value)
+
+      expect(res).toBe('UnameSUname')
+    })
+
+    it('reduces all values with an initial value in reverse order', () => {
+      const iter = new Map(obj)
+      const res = iter.reduceRight((acc, value) => acc + value, '')
+
+      expect(res).toBe('UnameSUname')
+    })
+  })
 })
