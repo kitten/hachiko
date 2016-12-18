@@ -87,11 +87,12 @@ describe('ValueNode', () => {
       expect(bIndex).toBe(1)
     })
 
-    it('should assign owner when it\'s being passed', () => {
+    it('should mutate in place if owner matches', () => {
       const owner = {}
-      const res = node.set(hashCode, key, 'newValue', owner)
+      const first = new ValueNode<string>(0, hashCode, key, value, owner)
+      const res = first.set(hashCode, key, 'newValue', owner)
 
-      expect(res).not.toBe(node)
+      expect(res).toBe(first)
       expect(res.value).toBe('newValue')
       expect(res.owner).toBe(owner)
     })
@@ -125,12 +126,13 @@ describe('ValueNode', () => {
       expect(res.value).toBe(node.value.toString())
     })
 
-    it('should assign owner when it\'s being passed', () => {
+    it('should mutate in place if owner matches', () => {
       const owner = {}
-      const node = new ValueNode<number>(0, 1, 1, 1)
+      const node = new ValueNode<number>(0, 1, 1, 1, owner)
       const res = node.map(x => x.toString(), owner)
 
-      expect(res).not.toBe(node)
+      expect(res).toBe(node)
+      expect(res.value).toBe('1')
       expect(res.owner).toBe(owner)
     })
   })

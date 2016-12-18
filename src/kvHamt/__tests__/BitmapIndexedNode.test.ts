@@ -60,6 +60,16 @@ describe('BitmapIndexedNode', () => {
       expect(result.get(2, 2)).toBe(42)
       expect(result.content[1]).toBeInstanceOf(BitmapIndexedNode)
     })
+
+    it('should mutate in place if owner matches', () => {
+      const owner = {}
+      const first = new BitmapIndexedNode<number>(0, content.length, bitmap, content, owner)
+      const res = first.set(3, 3, 111, owner) as BitmapIndexedNode<number>
+
+      expect(res).toBeInstanceOf(BitmapIndexedNode)
+      expect(res).toBe(first)
+      expect(res.owner).toBe(owner)
+    })
   })
 
   describe('delete', () => {
@@ -116,6 +126,19 @@ describe('BitmapIndexedNode', () => {
 
       expect(res).toBeInstanceOf(ValueNode)
       expect(res).toBe(subNode.content[1])
+    })
+
+    it('should mutate in place if owner matches', () => {
+      const owner = {}
+      const subNode = new BitmapIndexedNode(1, 0, 0, [], owner)
+        .set(0x22222, 34, 34, owner)
+        .set(0x22222, 35, 35, owner)
+
+      const res = subNode.delete(0x22222, 35, owner)
+
+      expect(res).toBeInstanceOf(BitmapIndexedNode)
+      expect(res).toBe(subNode)
+      expect(res.content[0]).toBeInstanceOf(ValueNode)
     })
   })
 
