@@ -14,22 +14,6 @@ describe('Iterable', () => {
     })
   })
 
-  describe('withMutations', () => {
-    it('should pass a mutable struct to a closure', () => {
-      const instantiatedMap = new Map(obj)
-      const structureNotMutated = instantiatedMap.withMutations((mutableMap) => {
-        mutableMap.set(firstKey, newValue)
-        expect(mutableMap.get(firstKey)).toBe(newValue)
-      })
-
-      expect(
-        structureNotMutated
-          .set(firstKey, obj[firstKey])
-          .get(firstKey)
-      ).not.toBe(newValue)
-    })
-  })
-
   describe('isEmpty', () => {
     it('should return boolean indicating whether iterable is empty', () => {
       expect(new Map().isEmpty()).toBeTruthy()
