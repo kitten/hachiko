@@ -163,7 +163,7 @@ describe('Map', () => {
 
   describe('entries', () => {
     it('should return an iterator for the entries of the structure', () => {
-      const keysIterator = new Map(obj).entries()
+      const entriesIterator = new Map(obj).entries()
       const keys = Object.keys(obj)
       const values = Object.keys(obj).map(key => obj[key])
 
@@ -171,7 +171,7 @@ describe('Map', () => {
       let i = 0
 
       while (!done) {
-        const { value, done: _done } = keysIterator.next()
+        const { value, done: _done } = entriesIterator.next()
         done = _done
 
         if (value) {
@@ -185,6 +185,4 @@ describe('Map', () => {
       expect(i).toBe(3)
     })
   })
-
-
 })
