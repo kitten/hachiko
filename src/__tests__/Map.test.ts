@@ -11,6 +11,14 @@ describe('Map', () => {
     })
   })
 
+  describe('isMap', () => {
+    it('should return boolean indicating whether input is an instance of Map', () => {
+      expect(Map.isMap(new Map())).toBeTruthy()
+      expect(Map.isMap(null)).toBeFalsy()
+      expect(Map.isMap({})).toBeFalsy()
+    })
+  })
+
   describe('get', () => {
     it('should get a value', () => {
       expect(
