@@ -5,7 +5,7 @@ global.Symbol = x => x
 // Remove defineProperty support
 Object.defineProperty = undefined
 
-const Cache = require('./Cache.ts').default
+const Cache = require('../Cache.ts').default
 
 describe('Cache without defineProperty or WeakMap', () => {
   describe('constructor', () => {
@@ -35,6 +35,7 @@ describe('Cache without defineProperty or WeakMap', () => {
 
       expect(key['@@_HACHIKO_HASH_@@']).toBe(undefined)
       expect(key.propertyIsEnumerable['@@_HACHIKO_HASH_@@']).toBe('test')
+      expect(key.propertyIsEnumerable('test')).toBe(false)
     })
 
     it('adds mapping to internal arrays as a fallback', () => {
@@ -70,6 +71,11 @@ describe('Cache without defineProperty or WeakMap', () => {
       cache.set(key, 'test')
 
       expect(cache.get(key)).toBe('test')
+    })
+
+    it('returns undefined if key is not found', () => {
+      const cache = new Cache()
+      expect(cache.get({})).toBe(undefined)
     })
   })
 })

@@ -3,7 +3,7 @@ global.WeakMap = undefined
 // Mock symbol as an identity function
 global.Symbol = x => x
 
-const Cache = require('./Cache.ts').default
+const Cache = require('../Cache.ts').default
 
 describe('Cache with defineProperty', () => {
   describe('constructor', () => {
