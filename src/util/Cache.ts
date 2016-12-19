@@ -74,9 +74,11 @@ if (WEAK_MAP_SUPPORT) {
       return res
     }
 
-    res = x.propertyIsEnumerable && x.propertyIsEnumerable[HASH_KEY]
-    if (res !== undefined) {
-      return res
+    if (x.propertyIsEnumerable) {
+      res = x.propertyIsEnumerable[HASH_KEY]
+      if (res !== undefined) {
+        return res
+      }
     }
 
     const keys = this.keys as any[]
@@ -94,7 +96,7 @@ if (WEAK_MAP_SUPPORT) {
     if (x.nodeType !== undefined) {
       x[HASH_KEY] = value
     } else if (
-      x.propertyIsEnumerable !== undefined &&
+      x.propertyIsEnumerable &&
       x.propertyIsEnumerable === x.constructor.prototype.propertyIsEnumerable
     ) {
       x.propertyIsEnumerable = function (this: Object) {
@@ -102,13 +104,13 @@ if (WEAK_MAP_SUPPORT) {
       }
 
       x.propertyIsEnumerable[HASH_KEY] = value
+    } else {
+      const keys = this.keys as any[]
+      const values = this.values as T[]
+
+      keys.push(x)
+      values.push(value)
     }
-
-    const keys = this.keys as any[]
-    const values = this.values as T[]
-
-    keys.push(x)
-    values.push(value)
   }
 }
 
