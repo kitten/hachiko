@@ -12,6 +12,16 @@ describe('Iterable', () => {
     })
   })
 
+  describe('hashCode', () => {
+    it('should return a combine hash code of all keys and values in the iterable', () => {
+      const first = new Map(obj)
+
+      expect(first.hashCode()).toBe(-799771731)
+      expect(first._hashCode).toBe(-799771731)
+      expect(first.hashCode()).toBe(first._hashCode)
+    })
+  })
+
   describe('isEmpty', () => {
     it('should return boolean indicating whether iterable is empty', () => {
       expect(new Map().isEmpty()).toBeTruthy()

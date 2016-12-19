@@ -10,6 +10,7 @@ import {
   Dict
 } from './constants'
 
+import hash, { combineHashes, murmurHash } from './util/hash'
 import reduce from './iterableHelpers/reduce'
 import filter from './iterableHelpers/filter'
 import { find, findEntry, findKey } from './iterableHelpers/find'
@@ -18,6 +19,8 @@ import { merge, mergeWith } from './iterableHelpers/merge'
 abstract class Iterable<T> {
   abstract size: number
   abstract owner?: Object
+
+  private _hashCode?: number
 
   static isIterable(object: any) {
     return object && object instanceof Iterable
@@ -29,6 +32,20 @@ abstract class Iterable<T> {
   abstract get(key: KVKey, notSetVal?: T): Option<T>
   abstract set(key: KVKey, value: T): Iterable<T>
   abstract delete(key: KVKey): Iterable<T>
+
+  hashCode(): number {
+    if (typeof this._hashCode !== 'number') {
+      let h = 1
+      this.__iterate((value: T, key: KVKey) => {
+        h = 31 * h + combineHashes(hash(value), hash(key)) | 0
+        return false
+      })
+
+      this._hashCode = murmurHash(this.size, h)
+    }
+
+    return this._hashCode
+  }
 
   isEmpty(): boolean {
     return !this.size
