@@ -18,6 +18,15 @@ describe('Cache with defineProperty', () => {
 
   describe('set', () => {
     const cache = new Cache()
+    const _isExtensible = Object.isExtensible
+
+    beforeEach(() => {
+      Object.isExtensible = () => true
+    })
+
+    afterAll(() => {
+      Object.isExtensible = _isExtensible
+    })
 
     it('defines the hash key property on an extensible object ', () => {
       Object.isExtensible = () => true
@@ -25,8 +34,8 @@ describe('Cache with defineProperty', () => {
 
       cache.set(key, 'test')
 
-      expect(key['@@_HACHIKO_HASH_@@']).toBe('test')
-      expect(Object.keys(key).includes('@@_HACHIKO_HASH_@@')).toBeFalsy()
+      expect(key[cache.hashKey]).toBe('test')
+      expect(Object.keys(key).includes(cache.hashKey)).toBeFalsy()
     })
 
     it('throws when defining the hash key property on a non-extensible object', () => {
@@ -36,6 +45,24 @@ describe('Cache with defineProperty', () => {
       expect(() => {
         cache.set(key, 'test')
       }).toThrow()
+    })
+
+    it('doesn\'t affect other Caches', () => {
+      const first = new Cache()
+      const second = new Cache()
+
+      const a = {}
+      const b = {}
+
+      first.set(a, '1')
+      second.set(a, '2')
+
+      first.set(b, 'b')
+
+      expect(first.get(a)).toBe('1')
+      expect(second.get(a)).toBe('2')
+      expect(first.get(b)).toBe('b')
+      expect(second.get(b)).toBe(undefined)
     })
   })
 

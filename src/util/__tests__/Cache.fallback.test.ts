@@ -25,8 +25,8 @@ describe('Cache without defineProperty or WeakMap', () => {
       const key = { nodeType: 1 }
       cache.set(key, 'test')
 
-      expect(key['@@_HACHIKO_HASH_@@']).toBe('test')
-      expect(Object.keys(key).includes('@@_HACHIKO_HASH_@@')).toBeTruthy()
+      expect(key[cache.hashKey]).toBe('test')
+      expect(Object.keys(key).includes(cache.hashKey)).toBeTruthy()
     })
 
     it('sets hash key property on propertyIsEnumerable if it can', () => {
@@ -34,7 +34,7 @@ describe('Cache without defineProperty or WeakMap', () => {
       cache.set(key, 'test')
 
       expect(key['@@_HACHIKO_HASH_@@']).toBe(undefined)
-      expect(key.propertyIsEnumerable['@@_HACHIKO_HASH_@@']).toBe('test')
+      expect(key.propertyIsEnumerable[cache.hashKey]).toBe('test')
       expect(key.propertyIsEnumerable('test')).toBe(false)
     })
 
@@ -42,10 +42,29 @@ describe('Cache without defineProperty or WeakMap', () => {
       const key = { propertyIsEnumerable: null }
       cache.set(key, 'test')
 
-      expect(key['@@_HACHIKO_HASH_@@']).toBe(undefined)
+      expect(key[cache.hashKey]).toBe(undefined)
       expect(cache.keys[0]).toBe(key)
       expect(cache.values[0]).toBe('test')
     })
+
+    it('doesn\'t affect other Caches', () => {
+      const first = new Cache()
+      const second = new Cache()
+
+      const a = {}
+      const b = {}
+
+      first.set(a, '1')
+      second.set(a, '2')
+
+      first.set(b, 'b')
+
+      expect(first.get(a)).toBe('1')
+      expect(second.get(a)).toBe('2')
+      expect(first.get(b)).toBe('b')
+      expect(second.get(b)).toBe(undefined)
+    })
+
   })
 
   describe('get', () => {

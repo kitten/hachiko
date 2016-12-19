@@ -3,6 +3,7 @@ import { indexOf } from './array'
 
 const IS_EXTENSIBLE_SUPPORT = typeof Object.isExtensible === 'function'
 const WEAK_MAP_SUPPORT = typeof WeakMap === 'function'
+const SYMBOL_SUPPORT = typeof Symbol === 'function'
 const DEFINE_PROPERTY_SUPPORT = (function () {
   try {
     Object.defineProperty({}, '@', {})
@@ -12,17 +13,26 @@ const DEFINE_PROPERTY_SUPPORT = (function () {
   }
 }())
 
-let HASH_KEY: string | symbol = '@@_HACHIKO_HASH_@@'
-if (typeof Symbol === 'function') {
-  HASH_KEY = Symbol(HASH_KEY)
+let keyIndex = 1
+const makeKey = (): string | symbol => {
+  const key = '@@_HACHIKO_HASH_' + (++keyIndex) + '_@@'
+
+  if (SYMBOL_SUPPORT) {
+    return Symbol(key)
+  }
+
+  return key
 }
 
 class Cache<T> {
+  hashKey: string | symbol
   weakMap?: WeakMap<any, T>
   keys?: any[]
   values?: T[]
 
   constructor() {
+    this.hashKey = makeKey()
+
     if (WEAK_MAP_SUPPORT) {
       this.weakMap = new WeakMap()
     } else if (!WEAK_MAP_SUPPORT && !DEFINE_PROPERTY_SUPPORT) {
@@ -51,15 +61,18 @@ if (WEAK_MAP_SUPPORT) {
 } else if (DEFINE_PROPERTY_SUPPORT) {
   // defineProperty is used to set hash on object
   Cache.prototype.get = function get<T>(this: Cache<T>, x: any): Option<T> {
-    return x[HASH_KEY]
+    const { hashKey } = this
+    return x[hashKey]
   }
 
   Cache.prototype.set = function set<T>(this: Cache<T>, x: any, value: T) {
+    const { hashKey } = this
+
     if (IS_EXTENSIBLE_SUPPORT && !Object.isExtensible(x)) {
       throw new TypeError(`Cannot cache hash ref on non-extensible object.`)
     }
 
-    Object.defineProperty(x, HASH_KEY, {
+    Object.defineProperty(x, hashKey, {
       enumerable: false,
       configurable: false,
       writable: false,
@@ -69,13 +82,15 @@ if (WEAK_MAP_SUPPORT) {
 } else {
   // Multiple (mediocre) fallbacks for IE8
   Cache.prototype.get = function get<T>(this: Cache<T>, x: any): Option<T> {
-    let res: T = x[HASH_KEY]
+    const { hashKey } = this
+
+    let res: T = x[hashKey]
     if (res !== undefined) {
       return res
     }
 
     if (x.propertyIsEnumerable) {
-      res = x.propertyIsEnumerable[HASH_KEY]
+      res = x.propertyIsEnumerable[hashKey]
       if (res !== undefined) {
         return res
       }
@@ -93,8 +108,10 @@ if (WEAK_MAP_SUPPORT) {
   }
 
   Cache.prototype.set = function set<T>(this: Cache<T>, x: any, value: T) {
+    const { hashKey } = this
+
     if (x.nodeType !== undefined) {
-      x[HASH_KEY] = value
+      x[hashKey] = value
     } else if (
       x.propertyIsEnumerable &&
       x.propertyIsEnumerable === x.constructor.prototype.propertyIsEnumerable
@@ -103,7 +120,7 @@ if (WEAK_MAP_SUPPORT) {
         return this.constructor.prototype.propertyIsEnumerable.apply(this, arguments)
       }
 
-      x.propertyIsEnumerable[HASH_KEY] = value
+      x.propertyIsEnumerable[hashKey] = value
     } else {
       const keys = this.keys as any[]
       const values = this.values as T[]
