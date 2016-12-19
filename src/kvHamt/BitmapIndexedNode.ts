@@ -1,30 +1,30 @@
 import Node from './Node'
-import { KVKey, Predicate, Transform, Option } from '../constants'
+import { Predicate, Transform, Option } from '../constants'
 import { spliceIn, replaceValue, spliceOut } from '../util/array'
 import { maskHash, indexBitOnBitmap } from '../util/bitmap'
 import ValueNode from './ValueNode'
 
-let EMPTY_NODE: BitmapIndexedNode<any>
-export function emptyNode<T>(): BitmapIndexedNode<T> {
+let EMPTY_NODE: BitmapIndexedNode<any, any>
+export function emptyNode<K, T>(): BitmapIndexedNode<K, T> {
   if (!EMPTY_NODE) {
-    EMPTY_NODE = new BitmapIndexedNode<any>(0, 0, 0, [])
+    EMPTY_NODE = new BitmapIndexedNode<any, any>(0, 0, 0, [])
   }
 
-  return EMPTY_NODE as BitmapIndexedNode<T>
+  return EMPTY_NODE as BitmapIndexedNode<K, T>
 }
 
-export default class BitmapIndexedNode<T> {
+export default class BitmapIndexedNode<K, T> {
   level: number // NOTE: This should be the parent's level plus one
   size: number
   bitmap: number
-  content: Node<T>[]
+  content: Node<K, T>[]
   owner?: Object
 
   constructor(
     level: number,
     size: number,
     bitmap: number,
-    content: Node<T>[],
+    content: Node<K, T>[],
     owner?: Object
   ) {
     this.level = level
@@ -34,7 +34,7 @@ export default class BitmapIndexedNode<T> {
     this.owner = owner
   }
 
-  get(hashCode: number, key: KVKey, notSetVal?: T): Option<T> {
+  get(hashCode: number, key: K, notSetVal?: T): Option<T> {
     const positionBitmap = maskHash(hashCode, this.level)
     const hasContent = this.bitmap & positionBitmap
 
@@ -47,7 +47,7 @@ export default class BitmapIndexedNode<T> {
     return node.get(hashCode, key, notSetVal)
   }
 
-  set(hashCode: number, key: KVKey, value: T, owner?: Object): BitmapIndexedNode<T> {
+  set(hashCode: number, key: K, value: T, owner?: Object): BitmapIndexedNode<K, T> {
     const positionBitmap = maskHash(hashCode, this.level)
     const hasContent = this.bitmap & positionBitmap
 
@@ -62,7 +62,7 @@ export default class BitmapIndexedNode<T> {
 
       const bitmap = this.bitmap | positionBitmap
       const contentIndex = indexBitOnBitmap(bitmap, positionBitmap)
-      const content = spliceIn<Node<T>>(this.content, contentIndex, node)
+      const content = spliceIn<Node<K, T>>(this.content, contentIndex, node)
       const size = this.size + 1
 
       if (owner && owner === this.owner) {
@@ -72,7 +72,7 @@ export default class BitmapIndexedNode<T> {
         return this
       }
 
-      return new BitmapIndexedNode<T>(
+      return new BitmapIndexedNode<K, T>(
         this.level,
         size,
         bitmap,
@@ -94,7 +94,7 @@ export default class BitmapIndexedNode<T> {
 
     const content = replaceValue(this.content, contentIndex, node)
 
-    return new BitmapIndexedNode<T>(
+    return new BitmapIndexedNode<K, T>(
       this.level,
       size,
       this.bitmap,
@@ -103,7 +103,7 @@ export default class BitmapIndexedNode<T> {
     )
   }
 
-  delete(hashCode: number, key: KVKey, owner?: Object): Option<Node<T>> {
+  delete(hashCode: number, key: K, owner?: Object): Option<Node<K, T>> {
     const positionBitmap = maskHash(hashCode, this.level)
     const hasContent = this.bitmap & positionBitmap
     if (!hasContent) {
@@ -113,14 +113,14 @@ export default class BitmapIndexedNode<T> {
     const contentIndex = indexBitOnBitmap(this.bitmap, positionBitmap)
     const oldNode = this.content[contentIndex]
 
-    const node: Option<Node<T>> = oldNode.delete(hashCode, key, owner)
+    const node: Option<Node<K, T>> = oldNode.delete(hashCode, key, owner)
     if (node === oldNode) {
       return this
     }
 
     let bitmap: number
     let size: number
-    let content: Node<T>[]
+    let content: Node<K, T>[]
     const contentLength = this.content.length
 
     if (!node) {
@@ -144,11 +144,11 @@ export default class BitmapIndexedNode<T> {
 
       bitmap = this.bitmap ^ positionBitmap
       size = this.size - oldNode.size
-      content = spliceOut<Node<T>>(this.content, contentIndex)
+      content = spliceOut<Node<K, T>>(this.content, contentIndex)
     } else {
       bitmap = this.bitmap
       size = this.size + node.size - oldNode.size
-      content = replaceValue<Node<T>>(this.content, contentIndex, node)
+      content = replaceValue<Node<K, T>>(this.content, contentIndex, node)
     }
 
     if (owner && owner === this.owner) {
@@ -158,7 +158,7 @@ export default class BitmapIndexedNode<T> {
       return this
     }
 
-    return new BitmapIndexedNode<T>(
+    return new BitmapIndexedNode<K, T>(
       this.level,
       size,
       bitmap,
@@ -167,21 +167,21 @@ export default class BitmapIndexedNode<T> {
     )
   }
 
-  map<G>(transform: Transform<T, G>, owner?: Object): Node<G> {
+  map<G>(transform: Transform<K, T, G>, owner?: Object): Node<K, G> {
     const length = this.content.length
-    const content: Node<G>[] = new Array(length)
+    const content: Node<K, G>[] = new Array(length)
     for (let i = 0; i < length; i++) {
       const node = this.content[i]
       content[i] = node.map<G>(transform, owner)
     }
 
     if (owner && owner === this.owner) {
-      const res = (this as BitmapIndexedNode<any>)
+      const res = (this as BitmapIndexedNode<any, any>)
       res.content = content
-      return (res as BitmapIndexedNode<G>)
+      return (res as BitmapIndexedNode<K, G>)
     }
 
-    return new BitmapIndexedNode<G>(
+    return new BitmapIndexedNode<K, G>(
       this.level,
       this.size,
       this.bitmap,
@@ -190,10 +190,10 @@ export default class BitmapIndexedNode<T> {
     )
   }
 
-  iterate(step: Predicate<T>) {
+  iterate(step: Predicate<K, T>) {
     const length = this.content.length
     for (let i = 0; i < length; i++) {
-      const node: Node<T> = this.content[i]
+      const node: Node<K, T> = this.content[i]
       if (node.iterate(step) === true) {
         return true
       }
@@ -202,9 +202,9 @@ export default class BitmapIndexedNode<T> {
     return false
   }
 
-  iterateReverse(step: Predicate<T>) {
+  iterateReverse(step: Predicate<K, T>) {
     for (let i = this.content.length - 1; i >= 0; i--) {
-      const node: Node<T> = this.content[i]
+      const node: Node<K, T> = this.content[i]
       if (node.iterateReverse(step) === true) {
         return true
       }
@@ -213,8 +213,8 @@ export default class BitmapIndexedNode<T> {
     return false
   }
 
-  clone(owner?: Object): BitmapIndexedNode<T> {
-    return new BitmapIndexedNode<T>(
+  clone(owner?: Object): BitmapIndexedNode<K, T> {
+    return new BitmapIndexedNode<K, T>(
       this.level,
       this.size,
       this.bitmap,

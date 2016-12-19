@@ -1,10 +1,10 @@
 import Iterable from '../Iterable'
-import { KVKey, Reducer } from '../constants'
+import { Reducer } from '../constants'
 
-const reduce = <T, G>(
-  iter: Iterable<T>,
+const reduce = <K, T, G>(
+  iter: Iterable<K, T>,
   reverse: boolean,
-  reducer: Reducer<T, G>,
+  reducer: Reducer<K, T, G>,
   initialValue?: any
 ): G => {
   let unset = false
@@ -14,7 +14,7 @@ const reduce = <T, G>(
   }
 
   iter.__iterate(
-    (value: T, key: KVKey) => {
+    (value: T, key: K) => {
       if (unset) {
         result = value
         unset = false

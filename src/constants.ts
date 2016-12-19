@@ -5,30 +5,27 @@ export const OVERFLOW_LEVEL = Math.ceil(32 / SIZE)
 
 export type Option<T> = T | undefined;
 
-export type KVKey = string | number
-export type KVTuple<T> = [ KVKey, T ]
-
 export interface Dict<T> {
   [key: string]: T
 }
 
-export interface Predicate<T> {
-  (value: T, key: KVKey): boolean
+export interface Predicate<K, T> {
+  (value: T, key: K): boolean
 }
 
-export interface Transform<T, G> {
-  (value: T, key: KVKey): G
+export interface Transform<K, T, G> {
+  (value: T, key: K): G
 }
 
-export interface Reducer<T, G> {
-  (acc: any, value: T, key: KVKey): G
+export interface Reducer<K, T, G> {
+  (acc: any, value: T, key: K): G
 }
 
 export interface Updater<T> {
   (value: T): T
 }
 
-export interface Merger<T> {
-  (prev: T, next: T, key: KVKey): T
+export interface Merger<K, T> {
+  (prev: T, next: T, key: K): T
 }
 

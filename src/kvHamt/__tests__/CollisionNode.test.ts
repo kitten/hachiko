@@ -12,7 +12,7 @@ describe('CollisionNode', () => {
   describe('constructor', () => {
     it('creates an instance correctly', () => {
       const owner = {}
-      const node = new CollisionNode<number>(1, 2, keys, values, owner)
+      const node = new CollisionNode<number, number>(1, 2, keys, values, owner)
 
       expect(node.level).toBe(1)
       expect(node.hashCode).toBe(2)
@@ -24,7 +24,7 @@ describe('CollisionNode', () => {
   })
 
   describe('get', () => {
-    const node = new CollisionNode<number>(0, 1, keys, values)
+    const node = new CollisionNode<number, number>(0, 1, keys, values)
 
     it('should return the value when keys match', () => {
       expect(node.get(1, 1)).toBe(2)
@@ -41,12 +41,12 @@ describe('CollisionNode', () => {
 
   describe('set', () => {
     const hashCode = 0x11111
-    const node = new CollisionNode<number>(0, hashCode, keys, values)
+    const node = new CollisionNode<number, number>(0, hashCode, keys, values)
 
     it('should add tuple to CollectionNode when hashCodes match', () => {
       const newKey = 0x22222
       const newValue = 42
-      const result = node.set(hashCode, newKey, newValue) as CollisionNode<number>
+      const result = node.set(hashCode, newKey, newValue) as CollisionNode<number, number>
 
       expect(result).toBeInstanceOf(CollisionNode)
       expect(result.keys.length).toBe(keys.length + 1)
@@ -56,8 +56,8 @@ describe('CollisionNode', () => {
 
     it('should mutate in place if owner matches', () => {
       const owner = {}
-      const first = new CollisionNode<number>(0, hashCode, keys, values, owner)
-      const second = first.set(0x11111, 0x22222, 42, owner) as CollisionNode<number>
+      const first = new CollisionNode<number, number>(0, hashCode, keys, values, owner)
+      const second = first.set(0x11111, 0x22222, 42, owner) as CollisionNode<number, number>
 
       expect(second).toBeInstanceOf(CollisionNode)
       expect(second).toBe(first)
@@ -67,7 +67,7 @@ describe('CollisionNode', () => {
     it('should overwrite tuple on CollectionNode when hashCodes and keys match', () => {
       const key = 1
       const newValue = 42
-      const result = node.set(hashCode, key, newValue) as CollisionNode<number>
+      const result = node.set(hashCode, key, newValue) as CollisionNode<number, number>
 
       expect(result).toBeInstanceOf(CollisionNode)
       expect(result.size).toBe(keys.length)
@@ -80,18 +80,18 @@ describe('CollisionNode', () => {
       const newKey = 64
       const newValue = 42
 
-      const result = node.set(newHashCode, newKey, newValue) as BitmapIndexedNode<number>
+      const result = node.set(newHashCode, newKey, newValue) as BitmapIndexedNode<number, number>
 
       expect(result).toBeInstanceOf(BitmapIndexedNode)
       expect(result.size).toBe(3)
 
-      const aNode = result.content[1] as CollisionNode<number>
+      const aNode = result.content[1] as CollisionNode<number, number>
       expect(aNode).toBeInstanceOf(CollisionNode)
       expect(aNode.keys).toBe(keys)
       expect(aNode.values).toBe(values)
       expect(aNode.hashCode).toBe(hashCode)
 
-      const bNode = result.content[0] as ValueNode<number>
+      const bNode = result.content[0] as ValueNode<number, number>
       expect(bNode).toBeInstanceOf(ValueNode)
       expect(bNode.key).toBe(newKey)
       expect(bNode.value).toBe(newValue)
@@ -105,7 +105,7 @@ describe('CollisionNode', () => {
   })
 
   describe('delete', () => {
-    const node = new CollisionNode<number>(1, 2, keys, values)
+    const node = new CollisionNode<number, number>(1, 2, keys, values)
 
     it('returns an unchanged node when key is not on the node (miss)', () => {
       const res = node.delete(123, 123) as CollisionNode<T>
@@ -113,7 +113,7 @@ describe('CollisionNode', () => {
     })
 
     it('returns undefined when length was one (compaction)', () => {
-      const sizeOne = new CollisionNode<number>(0, 1, [1], [1])
+      const sizeOne = new CollisionNode<number, number>(0, 1, [1], [1])
       const res = sizeOne.delete(1, 1)
 
       expect(res).toBe(undefined)
@@ -128,8 +128,8 @@ describe('CollisionNode', () => {
     })
 
     it('returns node without the specified key', () => {
-      const sizeThree = new CollisionNode<number>(0, 1, [ 1, 2, 3 ], [ 1, 2, 3 ])
-      const res = sizeThree.delete(1, 1) as CollisionNode<number>
+      const sizeThree = new CollisionNode<number, number>(0, 1, [ 1, 2, 3 ], [ 1, 2, 3 ])
+      const res = sizeThree.delete(1, 1) as CollisionNode<number, number>
 
       expect(res).toBeInstanceOf(CollisionNode)
       expect(res.size).toBe(2)
@@ -138,8 +138,8 @@ describe('CollisionNode', () => {
 
     it('should mutate in place if owner matches', () => {
       const owner = {}
-      const sizeThree = new CollisionNode<number>(0, 1, [ 1, 2, 3 ], [ 1, 2, 3 ], owner)
-      const res = sizeThree.delete(1, 1, owner) as CollisionNode<number>
+      const sizeThree = new CollisionNode<number, number>(0, 1, [ 1, 2, 3 ], [ 1, 2, 3 ], owner)
+      const res = sizeThree.delete(1, 1, owner) as CollisionNode<number, number>
 
       expect(res).toBeInstanceOf(CollisionNode)
       expect(res).toBe(sizeThree)
@@ -148,7 +148,7 @@ describe('CollisionNode', () => {
   })
 
   describe('map', () => {
-    const node = new CollisionNode<number>(1, 2, keys, values)
+    const node = new CollisionNode<number, number>(1, 2, keys, values)
 
     it('transforms all values using specified transformer function', () => {
       const res = node.map(x => x.toString())
@@ -159,7 +159,7 @@ describe('CollisionNode', () => {
 
     it('should mutate in place if owner matches', () => {
       const owner = {}
-      const first = new CollisionNode<number>(1, 2, keys, values, owner)
+      const first = new CollisionNode<number, number>(1, 2, keys, values, owner)
       const res = first.map(x => x.toString(), owner)
 
       expect(res).toBeInstanceOf(CollisionNode)
@@ -170,7 +170,7 @@ describe('CollisionNode', () => {
   })
 
   describe('iterate', () => {
-    const node = new CollisionNode<number>(1, 2, keys, values)
+    const node = new CollisionNode<number, number>(1, 2, keys, values)
 
     it('iterates through all entries', () => {
       const keys = []
@@ -202,7 +202,7 @@ describe('CollisionNode', () => {
   })
 
   describe('iterateReverse', () => {
-    const node = new CollisionNode<number>(1, 2, keys, values)
+    const node = new CollisionNode<number, number>(1, 2, keys, values)
 
     it('iterates through all entries in reverse', () => {
       const keys = []
@@ -236,7 +236,7 @@ describe('CollisionNode', () => {
   })
 
   describe('clone', () => {
-    const node = new CollisionNode<number>(1, 2, keys, values)
+    const node = new CollisionNode<number, number>(1, 2, keys, values)
 
     it('clones the node', () => {
       const res = node.clone()

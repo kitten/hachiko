@@ -1,13 +1,13 @@
 import Node from './Node'
-import { KVKey, Predicate, Transform, Option } from '../constants'
+import { Predicate, Transform, Option } from '../constants'
 import { copyArray, indexOf, spliceOut } from '../util/array'
 import ValueNode from './ValueNode'
 import resolveConflict from './resolveConflict'
 
-export default class CollisionNode<T> {
+export default class CollisionNode<K, T> {
   level: number // NOTE: Receives their level from the parent
   hashCode: number
-  keys: KVKey[]
+  keys: K[]
   values: T[]
   size: number
   owner?: Object
@@ -15,7 +15,7 @@ export default class CollisionNode<T> {
   constructor(
     level: number,
     hashCode: number,
-    keys: KVKey[],
+    keys: K[],
     values: T[],
     owner?: Object
   ) {
@@ -27,7 +27,7 @@ export default class CollisionNode<T> {
     this.owner = owner
   }
 
-  get(hashCode: number, key: KVKey, notSetVal?: T): Option<T> {
+  get(hashCode: number, key: K, notSetVal?: T): Option<T> {
     const length = this.keys.length
 
     for (let index = 0; index < length; index++) {
@@ -39,12 +39,12 @@ export default class CollisionNode<T> {
     return notSetVal
   }
 
-  set(hashCode: number, key: KVKey, value: T, owner?: Object): Node<T> {
+  set(hashCode: number, key: K, value: T, owner?: Object): Node<K, T> {
     // Resolve different hashCodes by branching off
     if (hashCode !== this.hashCode) {
-      const valueNode = new ValueNode<T>(0, hashCode, key, value, owner)
+      const valueNode = new ValueNode<K, T>(0, hashCode, key, value, owner)
 
-      return resolveConflict<T>(
+      return resolveConflict<K, T>(
         this.level,
         this.hashCode,
         this.clone(owner),
@@ -63,7 +63,7 @@ export default class CollisionNode<T> {
       }
     }
 
-    const keys = copyArray<KVKey>(this.keys)
+    const keys = copyArray<K>(this.keys)
     const values = copyArray<T>(this.values)
     keys[index] = key
     values[index] = value
@@ -75,7 +75,7 @@ export default class CollisionNode<T> {
       return this
     }
 
-    return new CollisionNode<T>(
+    return new CollisionNode<K, T>(
       this.level,
       this.hashCode,
       keys,
@@ -84,8 +84,8 @@ export default class CollisionNode<T> {
     )
   }
 
-  delete(hashCode: number, key: KVKey, owner?: Object): Option<Node<T>> {
-    const index = indexOf<KVKey>(this.keys, key)
+  delete(hashCode: number, key: K, owner?: Object): Option<Node<K, T>> {
+    const index = indexOf<K>(this.keys, key)
 
     if (index === -1) {
       return this
@@ -95,7 +95,7 @@ export default class CollisionNode<T> {
     if (length === 1) {
       return undefined
     } else if (length === 2) {
-      return new ValueNode<T>(
+      return new ValueNode<K, T>(
         this.level,
         this.hashCode,
         this.keys[1 - index],
@@ -104,7 +104,7 @@ export default class CollisionNode<T> {
       )
     }
 
-    const keys = spliceOut<KVKey>(this.keys, index)
+    const keys = spliceOut<K>(this.keys, index)
     const values = spliceOut<T>(this.values, index)
 
     if (owner && owner === this.owner) {
@@ -114,7 +114,7 @@ export default class CollisionNode<T> {
       return this
     }
 
-    return new CollisionNode<T>(
+    return new CollisionNode<K, T>(
       this.level,
       this.hashCode,
       keys,
@@ -123,7 +123,7 @@ export default class CollisionNode<T> {
     )
   }
 
-  map<G>(transform: Transform<T, G>, owner?: Object): Node<G> {
+  map<G>(transform: Transform<K, T, G>, owner?: Object): Node<K, G> {
     const length = this.keys.length
     const values = new Array(length)
     for (let i = 0; i < length; i++) {
@@ -133,12 +133,12 @@ export default class CollisionNode<T> {
     }
 
     if (owner && owner === this.owner) {
-      const res = (this as CollisionNode<any>)
+      const res = (this as CollisionNode<any, any>)
       res.values = values
-      return (res as CollisionNode<G>)
+      return (res as CollisionNode<K, G>)
     }
 
-    return new CollisionNode<G>(
+    return new CollisionNode<K, G>(
       this.level,
       this.hashCode,
       this.keys,
@@ -147,7 +147,7 @@ export default class CollisionNode<T> {
     )
   }
 
-  iterate(step: Predicate<T>) {
+  iterate(step: Predicate<K, T>) {
     const length = this.keys.length
     for (let i = 0; i < length; i++) {
       const key = this.keys[i]
@@ -161,7 +161,7 @@ export default class CollisionNode<T> {
     return false
   }
 
-  iterateReverse(step: Predicate<T>) {
+  iterateReverse(step: Predicate<K, T>) {
     for (let i = this.keys.length - 1; i >= 0; i--) {
       const key = this.keys[i]
       const value = this.values[i]
@@ -174,7 +174,7 @@ export default class CollisionNode<T> {
     return false
   }
 
-  clone(owner?: Object): CollisionNode<T> {
+  clone(owner?: Object): CollisionNode<K, T> {
     return new CollisionNode(
       this.level,
       this.hashCode,

@@ -1,10 +1,10 @@
 import Iterable from '../Iterable'
-import { KVKey, Predicate } from '../constants'
+import { Predicate } from '../constants'
 
-const filter = <T>(iter: Iterable<T>, predicate: Predicate<T>, bool: boolean) => {
+const filter = <K, T>(iter: Iterable<K, T>, predicate: Predicate<K, T>, bool: boolean) => {
   let mutable = iter.owner ? iter : iter.asMutable()
 
-  iter.__iterate((value: T, key: KVKey) => {
+  iter.__iterate((value: T, key: K) => {
     const condition = !!predicate(value, key)
     if (condition === bool) {
       mutable = mutable.delete(key)

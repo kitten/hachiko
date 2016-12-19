@@ -1,4 +1,4 @@
-import { KVKey, Predicate, Transform, Updater, Option } from './constants'
+import { Predicate, Transform, Updater, Option } from './constants'
 import hash from './util/hash'
 import BitmapIndexedNode, { emptyNode } from './kvHamt/BitmapIndexedNode'
 import Iterable from './Iterable'
@@ -11,23 +11,23 @@ import {
   EntryIterator
 } from './kvHamt/Iterator'
 
-let EMPTY_MAP: Map<any>
-function emptyMap<T>(): Map<T> {
+let EMPTY_MAP: Map<any, any>
+function emptyMap<K, T>(): Map<K, T> {
   if (!EMPTY_MAP) {
     EMPTY_MAP = Object.create(Map.prototype)
-    EMPTY_MAP.root = emptyNode<T>()
+    EMPTY_MAP.root = emptyNode<K, T>()
     EMPTY_MAP.size = 0
   }
 
-  return EMPTY_MAP as Map<T>
+  return EMPTY_MAP as Map<K, T>
 }
 
-function makeMap<T>(root: BitmapIndexedNode<T>, forceCreation = false): Map<T> {
+function makeMap<K, T>(root: BitmapIndexedNode<K, T>, forceCreation = false): Map<K, T> {
   if (
     !forceCreation &&
     root.size === 0
   ) {
-    return emptyMap<T>()
+    return emptyMap<K, T>()
   }
 
   const res = Object.create(Map.prototype)
@@ -36,33 +36,33 @@ function makeMap<T>(root: BitmapIndexedNode<T>, forceCreation = false): Map<T> {
   return res
 }
 
-export default class Map<T> extends Iterable<T> {
-  root: BitmapIndexedNode<T>
+export default class Map<K, T> extends Iterable<K, T> {
+  root: BitmapIndexedNode<K, T>
   size: number
   owner?: Object
 
   constructor(input: any) {
     super()
 
-    let root = emptyNode<T>()
+    let root = emptyNode<K, T>()
 
     const owner = {}
-    iterate<T>(input, (val, key) => {
+    iterate<K, T>(input, (val, key) => {
       root = root.set(hash(key), key, val, owner)
     })
 
-    return makeMap<T>(root)
+    return makeMap<K, T>(root)
   }
 
   static isMap(object: any) {
     return object && object instanceof Map
   }
 
-  get(key: KVKey, notSetVal?: T): Option<T> {
+  get(key: K, notSetVal?: T): Option<T> {
     return this.root.get(hash(key), key, notSetVal)
   }
 
-  set(key: KVKey, value: T): Map<T> {
+  set(key: K, value: T): Map<K, T> {
     const root = this.root.set(hash(key), key, value, this.owner)
 
     if (this.owner) {
@@ -71,66 +71,66 @@ export default class Map<T> extends Iterable<T> {
       return this
     }
 
-    return makeMap<T>(root)
+    return makeMap<K, T>(root)
   }
 
-  delete(key: KVKey): Map<T> {
-    const root = this.root.delete(hash(key), key, this.owner) as BitmapIndexedNode<T>
+  delete(key: K): Map<K, T> {
+    const root = this.root.delete(hash(key), key, this.owner) as BitmapIndexedNode<K, T>
     if (this.owner) {
       this.root = root
       this.size = root.size
       return this
     }
 
-    return makeMap<T>(root)
+    return makeMap<K, T>(root)
   }
 
-  update(key: KVKey, updater: Updater<T>): Iterable<T> {
+  update(key: K, updater: Updater<T>): Iterable<K, T> {
     const value = this.get(key) as T
     return this.set(key, updater(value))
   }
 
-  map<G>(transform: Transform<T, G>): Map<G> {
-    const root = this.root.map<G>(transform, this.owner) as BitmapIndexedNode<G>
+  map<G>(transform: Transform<K, T, G>): Map<K, G> {
+    const root = this.root.map<G>(transform, this.owner) as BitmapIndexedNode<K, G>
     if (this.owner) {
-      const res = (this as Map<any>)
+      const res = (this as Map<any, any>)
       res.root = root
-      return (res as Map<G>)
+      return (res as Map<K, G>)
     }
 
-    return makeMap<G>(root)
+    return makeMap<K, G>(root)
   }
 
-  clear(): Map<T> {
-    return emptyMap<T>()
+  clear(): Map<K, T> {
+    return emptyMap<K, T>()
   }
 
-  asMutable(): Map<T> {
+  asMutable(): Map<K, T> {
     if (this.owner) {
       return this
     }
 
-    const res = makeMap<T>(this.root, true)
+    const res = makeMap<K, T>(this.root, true)
     res.owner = {}
     return res
   }
 
-  asImmutable(): Map<T> {
+  asImmutable(): Map<K, T> {
     if (!this.size) {
-      return emptyMap<T>()
+      return emptyMap<K, T>()
     }
 
     this.owner = undefined
     return this
   }
 
-  withMutations(closure: (x: Map<T>) => void) {
+  withMutations(closure: (x: Map<K, T>) => void) {
     let mutable = this.asMutable()
     closure(mutable)
     return mutable.asImmutable()
   }
 
-  __iterate(step: Predicate<T>, reverse?: boolean) {
+  __iterate(step: Predicate<K, T>, reverse?: boolean) {
     if (reverse) {
       return this.root.iterateReverse(step)
     }
@@ -138,19 +138,19 @@ export default class Map<T> extends Iterable<T> {
     return this.root.iterate(step)
   }
 
-  values(): ValueIterator<T> {
-    return new ValueIterator<T>(this.root)
+  values(): ValueIterator<K, T> {
+    return new ValueIterator<K, T>(this.root)
   }
 
-  keys(): KeyIterator<T> {
-    return new KeyIterator<T>(this.root)
+  keys(): KeyIterator<K, T> {
+    return new KeyIterator<K, T>(this.root)
   }
 
-  entries(): EntryIterator<T> {
-    return new EntryIterator<T>(this.root)
+  entries(): EntryIterator<K, T> {
+    return new EntryIterator<K, T>(this.root)
   }
 
-  [IteratorSymbol](): EntryIterator<T> {
+  [IteratorSymbol](): EntryIterator<K, T> {
     return this.entries()
   }
 }

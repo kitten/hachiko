@@ -1,12 +1,9 @@
 import {
-  KVKey,
-  KVTuple,
   Merger,
   Predicate,
   Reducer,
   Option,
   Transform,
-  Updater,
   Dict
 } from './constants'
 
@@ -16,7 +13,7 @@ import filter from './iterableHelpers/filter'
 import { find, findEntry, findKey } from './iterableHelpers/find'
 import { merge, mergeWith } from './iterableHelpers/merge'
 
-abstract class Iterable<T> {
+abstract class Iterable<K, T> {
   abstract size: number
   abstract owner?: Object
 
@@ -26,17 +23,17 @@ abstract class Iterable<T> {
     return object && object instanceof Iterable
   }
 
-  abstract __iterate(step: Predicate<T>, reverse?: boolean): boolean
-  abstract asMutable(): Iterable<T>
-  abstract asImmutable(): Iterable<T>
-  abstract get(key: KVKey, notSetVal?: T): Option<T>
-  abstract set(key: KVKey, value: T): Iterable<T>
-  abstract delete(key: KVKey): Iterable<T>
+  abstract __iterate(step: Predicate<K, T>, reverse?: boolean): boolean
+  abstract asMutable(): Iterable<K, T>
+  abstract asImmutable(): Iterable<K, T>
+  abstract get(key: K, notSetVal?: T): Option<T>
+  abstract set(key: K, value: T): Iterable<K, T>
+  abstract delete(key: K): Iterable<K, T>
 
   hashCode(): number {
     if (typeof this._hashCode !== 'number') {
       let h = 1
-      this.__iterate((value: T, key: KVKey) => {
+      this.__iterate((value: T, key: K) => {
         h = 31 * h + combineHashes(hash(value), hash(key)) | 0
         return false
       })
@@ -51,28 +48,35 @@ abstract class Iterable<T> {
     return !this.size
   }
 
-  forEach(sideEffect: (value: T, key: KVKey) => void) {
-    this.__iterate((value: T, key: KVKey) => {
+  forEach(sideEffect: (value: T, key: K) => void) {
+    this.__iterate((value: T, key: K) => {
       sideEffect(value, key)
       return false
     })
   }
 
-  merge(...iterables: (Dict<T> | Iterable<T>)[]): Iterable<T> {
-    return merge<T>(this, iterables)
+  merge(...iterables: (Dict<T> | Iterable<K, T>)[]): Iterable<K, T> {
+    return merge<K, T>(this, iterables)
   }
 
-  mergeWith(merger: Merger<T>, ...iterables: (Dict<T> | Iterable<T>)[]): Iterable<T> {
-    return mergeWith<T>(this, merger, iterables)
+  mergeWith(
+    merger: Merger<K | string, T>,
+    ...iterables: (Dict<T> | Iterable<K, T>)[]
+  ): Iterable<K, T> {
+    return mergeWith<K, T>(this, merger, iterables)
   }
 
-  mapKeys(transform: Updater<KVKey>): Iterable<T> {
-    let mutable = this.owner ? this : this.asMutable()
-    this.__iterate((value: T, key: KVKey) => {
+  mapKeys<G>(
+    transform: (key: K) => G
+  ): Iterable<G, T> {
+    const self = (this as Iterable<any, any>)
+
+    let mutable = (self.owner ? self : self.asMutable()) as Iterable<G, T>
+    this.__iterate((value: T, key: K) => {
       const newKey = transform(key)
-      if (newKey !== key) {
+      if (newKey as any !== key) {
         mutable = mutable
-          .delete(key)
+          .delete(key as any)
           .set(newKey, value)
       }
 
@@ -82,14 +86,14 @@ abstract class Iterable<T> {
     return this.owner ? mutable : mutable.asImmutable()
   }
 
-  mapEntries<G>(transform: Transform<T, KVTuple<G>>): Iterable<G> {
-    const self = (this as Iterable<any>)
+  mapEntries<U, G>(transform: Transform<K, T, [U, G]>): Iterable<U, G> {
+    const self = (this as Iterable<any, any>)
 
-    let mutable = (self.owner ? self : self.asMutable()) as Iterable<G>
-    this.__iterate((value: T, key: KVKey) => {
+    let mutable = (self.owner ? self : self.asMutable()) as Iterable<U, G>
+    this.__iterate((value: T, key: K) => {
       const [newKey, newValue] = transform(value, key)
-      if (newKey !== key) {
-        mutable = mutable.delete(key)
+      if (newKey as any !== key) {
+        mutable = mutable.delete(key as any)
       }
 
       mutable = mutable.set(newKey, newValue)
@@ -99,40 +103,40 @@ abstract class Iterable<T> {
     return self.owner ? mutable : mutable.asImmutable()
   }
 
-  filter(predicate: Predicate<T>): Iterable<T> {
-    return filter<T>(this, predicate, false)
+  filter(predicate: Predicate<K, T>): Iterable<K, T> {
+    return filter<K, T>(this, predicate, false)
   }
 
-  filterNot(predicate: Predicate<T>): Iterable<T> {
-    return filter<T>(this, predicate, true)
+  filterNot(predicate: Predicate<K, T>): Iterable<K, T> {
+    return filter<K, T>(this, predicate, true)
   }
 
-  find(predicate: Predicate<T>, notSetValue?: T): Option<T> {
-    return find<T>(this, false, predicate, notSetValue)
+  find(predicate: Predicate<K, T>, notSetValue?: T): Option<T> {
+    return find<K, T>(this, false, predicate, notSetValue)
   }
 
-  findLast(predicate: Predicate<T>, notSetValue?: T): Option<T> {
-    return find<T>(this, true, predicate, notSetValue)
+  findLast(predicate: Predicate<K, T>, notSetValue?: T): Option<T> {
+    return find<K, T>(this, true, predicate, notSetValue)
   }
 
-  findEntry(predicate: Predicate<T>, notSetValue?: T): Option<KVTuple<T> | T> {
-    return findEntry<T>(this, false, predicate, notSetValue)
+  findEntry(predicate: Predicate<K, T>, notSetValue?: T): Option<[K, T] | T> {
+    return findEntry<K, T>(this, false, predicate, notSetValue)
   }
 
-  findLastEntry(predicate: Predicate<T>, notSetValue?: T): Option<KVTuple<T> | T> {
-    return findEntry<T>(this, true, predicate, notSetValue)
+  findLastEntry(predicate: Predicate<K, T>, notSetValue?: T): Option<[K, T] | T> {
+    return findEntry<K, T>(this, true, predicate, notSetValue)
   }
 
-  findKey(predicate: Predicate<T>, notSetValue?: KVKey): Option<KVKey> {
-    return findKey<T>(this, false, predicate, notSetValue)
+  findKey(predicate: Predicate<K, T>, notSetValue?: K): Option<K> {
+    return findKey<K, T>(this, false, predicate, notSetValue)
   }
 
-  findLastKey(predicate: Predicate<T>, notSetValue?: KVKey): Option<KVKey> {
-    return findKey<T>(this, true, predicate, notSetValue)
+  findLastKey(predicate: Predicate<K, T>, notSetValue?: K): Option<K> {
+    return findKey<K, T>(this, true, predicate, notSetValue)
   }
 
-  reduce<G>(reducer: Reducer<T, G>, initialValue?: any): G {
-    return reduce<T, G>(
+  reduce<G>(reducer: Reducer<K, T, G>, initialValue?: any): G {
+    return reduce<K, T, G>(
       this,
       false,
       reducer,
@@ -140,8 +144,8 @@ abstract class Iterable<T> {
     )
   }
 
-  reduceRight<G>(reducer: Reducer<T, G>, initialValue?: any): G {
-    return reduce<T, G>(
+  reduceRight<G>(reducer: Reducer<K, T, G>, initialValue?: any): G {
+    return reduce<K, T, G>(
       this,
       true,
       reducer,
@@ -151,7 +155,7 @@ abstract class Iterable<T> {
 
   join(separator = ','): string {
     let result = ''
-    this.__iterate((value: T, key: KVKey) => {
+    this.__iterate((value: T, key: K) => {
       result = (result ? result + separator : result) + value
       return false
     })
@@ -159,9 +163,9 @@ abstract class Iterable<T> {
     return result
   }
 
-  count(predicate: Predicate<T>): number {
+  count(predicate: Predicate<K, T>): number {
     let count = 0
-    this.__iterate((value: T, key: KVKey) => {
+    this.__iterate((value: T, key: K) => {
       if (predicate(value, key)) {
         count = count + 1
       }
@@ -172,13 +176,13 @@ abstract class Iterable<T> {
     return count
   }
 
-  has(key: KVKey): boolean {
-    const NOT_SET = {} as T
+  has(key: K): boolean {
+    const NOT_SET = {} as any
     return this.get(key, NOT_SET) !== NOT_SET
   }
 
   includes(value: T): boolean {
-    return this.__iterate((_value: T, key: KVKey) => {
+    return this.__iterate((_value: T, key: K) => {
       if (value === _value) {
         return true
       }
@@ -187,19 +191,19 @@ abstract class Iterable<T> {
     })
   }
 
-  every(predicate: Predicate<T>) {
-    return !this.__iterate((value: T, key: KVKey) => (
+  every(predicate: Predicate<K, T>) {
+    return !this.__iterate((value: T, key: K) => (
       !predicate(value, key)
     ))
   }
 
-  some(predicate: Predicate<T>) {
+  some(predicate: Predicate<K, T>) {
     return this.__iterate(predicate)
   }
 
   first(): Option<T> {
     let res: Option<T> = undefined
-    this.__iterate((value: T, key: KVKey) => {
+    this.__iterate((value: T, key: K) => {
       res = value
       return true
     })
@@ -210,7 +214,7 @@ abstract class Iterable<T> {
   last(): Option<T> {
     let res: Option<T> = undefined
     this.__iterate(
-      (value: T, key: KVKey) => {
+      (value: T, key: K) => {
         res = value
         return true
       },

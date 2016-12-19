@@ -1,7 +1,10 @@
 import Iterable from '../Iterable'
-import { KVKey, Dict, Merger } from '../constants'
+import { Dict, Merger } from '../constants'
 
-export const merge = <T>(iter: Iterable<T>, iterables: (Dict<T> | Iterable<T>)[]): Iterable<T> => {
+export const merge = <K, T>(
+  iter: Iterable<K, T>,
+  iterables: (Dict<T> | Iterable<K, T>)[]
+): Iterable<K, T> => {
   if (!iterables.length) {
     return iter
   }
@@ -18,11 +21,11 @@ export const merge = <T>(iter: Iterable<T>, iterables: (Dict<T> | Iterable<T>)[]
       const length = keys.length
 
       for (let j = 0; j < length; j++) {
-        const key = keys[j]
+        const key = keys[j] as any
         mutable = mutable.set(key, _iterable[key])
       }
     } else {
-      (iterable as Iterable<T>).__iterate((value: T, key: KVKey) => {
+      (iterable as Iterable<K, T>).__iterate((value: T, key: K) => {
         mutable = mutable.set(key, value)
         return false
       })
@@ -32,11 +35,11 @@ export const merge = <T>(iter: Iterable<T>, iterables: (Dict<T> | Iterable<T>)[]
   return iter.owner ? mutable : mutable.asImmutable()
 }
 
-export const mergeWith = <T>(
-  iter: Iterable<T>,
-  merger: Merger<T>,
-  iterables: (Dict<T> | Iterable<T>)[]
-): Iterable<T> => {
+export const mergeWith = <K, T>(
+  iter: Iterable<K, T>,
+  merger: Merger<K | string, T>,
+  iterables: (Dict<T> | Iterable<K, T>)[]
+): Iterable<K, T> => {
   if (!iterables.length) {
     return iter
   }
@@ -53,7 +56,7 @@ export const mergeWith = <T>(
       const length = keys.length
 
       for (let j = 0; j < length; j++) {
-        const key = keys[j]
+        const key = keys[j] as any
         const prev = mutable.get(key)
         const next = (prev !== undefined) ?
           merger(prev, _iterable[key], key) :
@@ -62,7 +65,7 @@ export const mergeWith = <T>(
         mutable = mutable.set(key, next)
       }
     } else {
-      (iterable as Iterable<T>).__iterate((value: T, key: KVKey) => {
+      (iterable as Iterable<K, T>).__iterate((value: T, key: K) => {
         const prev = mutable.get(key)
         const next = (prev !== undefined) ?
           merger(prev, value, key) :

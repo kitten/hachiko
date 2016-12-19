@@ -6,7 +6,7 @@ import { maskHash, indexBitOnBitmap } from '../../util/bitmap'
 describe('ValueNode', () => {
   describe('constructor', () => {
     it('creates an instance correctly', () => {
-      const node = new ValueNode<number>(1, 2, 3, 4)
+      const node = new ValueNode<number, number>(1, 2, 3, 4)
 
       expect(node.level).toBe(1)
       expect(node.size).toBe(1)
@@ -21,7 +21,7 @@ describe('ValueNode', () => {
     const value = 'value'
     const notSetVal = 'not-set'
 
-    const node = new ValueNode<string>(0, 1, key, value)
+    const node = new ValueNode<string, string>(0, 1, key, value)
 
     it('should return the value when keys match', () => {
       expect(node.get(1, key)).toBe(value)
@@ -38,11 +38,11 @@ describe('ValueNode', () => {
     const key = 'key'
     const value = 'value'
 
-    const node = new ValueNode<string>(0, hashCode, key, value)
+    const node = new ValueNode<string, string>(0, hashCode, key, value)
 
     // This happens when the user updates a key's value
     it('should update ValueNode when keys match', () => {
-      const result = node.set(hashCode, key, 'newValue') as ValueNode<string>
+      const result = node.set(hashCode, key, 'newValue') as ValueNode<string, string>
 
       expect(result).toBeInstanceOf(ValueNode)
       expect(result.value).toBe('newValue')
@@ -52,7 +52,7 @@ describe('ValueNode', () => {
     it('should create a CollisionNode when only hashCodes match', () => {
       const newKey = 'newKey'
       const newValue = 'newValue'
-      const result = node.set(hashCode, newKey, newValue) as CollisionNode<string>
+      const result = node.set(hashCode, newKey, newValue) as CollisionNode<string, string>
 
       expect(result).toBeInstanceOf(CollisionNode)
       expect(result.size).toBe(2)
@@ -67,16 +67,16 @@ describe('ValueNode', () => {
       const newKey = 'newKey'
       const newValue = 'newValue'
 
-      const result = node.set(newHashCode, newKey, newValue) as BitmapIndexedNode<string>
+      const result = node.set(newHashCode, newKey, newValue) as BitmapIndexedNode<string, string>
 
       expect(result).toBeInstanceOf(BitmapIndexedNode)
       expect(result.size).toBe(2)
 
-      const aNode = result.content[1] as ValueNode<string>
+      const aNode = result.content[1] as ValueNode<string, string>
       expect(aNode.key).toBe(key)
       expect(aNode.value).toBe(value)
 
-      const bNode = result.content[0] as ValueNode<string>
+      const bNode = result.content[0] as ValueNode<string, string>
       expect(bNode.key).toBe(newKey)
       expect(bNode.value).toBe(newValue)
 
@@ -89,7 +89,7 @@ describe('ValueNode', () => {
 
     it('should mutate in place if owner matches', () => {
       const owner = {}
-      const first = new ValueNode<string>(0, hashCode, key, value, owner)
+      const first = new ValueNode<string, string>(0, hashCode, key, value, owner)
       const res = first.set(hashCode, key, 'newValue', owner)
 
       expect(res).toBe(first)
@@ -103,7 +103,7 @@ describe('ValueNode', () => {
     const key = 'key'
     const value = 'value'
 
-    const node = new ValueNode<string>(0, hashCode, key, value)
+    const node = new ValueNode<string, string>(0, hashCode, key, value)
 
     it('returns undefined when keys match (hit)', () => {
       const res = node.delete(hashCode, key)
@@ -118,7 +118,7 @@ describe('ValueNode', () => {
 
   describe('map', () => {
     it('should transform value using transformer function', () => {
-      const node = new ValueNode<number>(0, 1, 1, 1)
+      const node = new ValueNode<number, number>(0, 1, 1, 1)
       const res = node.map(x => x.toString())
 
       expect(res).toBeInstanceOf(ValueNode)
@@ -128,7 +128,7 @@ describe('ValueNode', () => {
 
     it('should mutate in place if owner matches', () => {
       const owner = {}
-      const node = new ValueNode<number>(0, 1, 1, 1, owner)
+      const node = new ValueNode<number, number>(0, 1, 1, 1, owner)
       const res = node.map(x => x.toString(), owner)
 
       expect(res).toBe(node)
@@ -140,7 +140,7 @@ describe('ValueNode', () => {
   describe('iterate', () => {
     it('calls predicate using value and key', () => {
       const predicate = jest.fn()
-      const node = new ValueNode<number>(0, 1, 1, 1)
+      const node = new ValueNode<number, number>(0, 1, 1, 1)
       node.iterate(predicate)
 
       expect(predicate).toHaveBeenCalledTimes(1)
@@ -151,7 +151,7 @@ describe('ValueNode', () => {
   describe('iterateReverse', () => {
     it('calls predicate using value and key', () => {
       const predicate = jest.fn()
-      const node = new ValueNode<number>(0, 1, 1, 1)
+      const node = new ValueNode<number, number>(0, 1, 1, 1)
       node.iterateReverse(predicate)
 
       expect(predicate).toHaveBeenCalledTimes(1)
@@ -160,7 +160,7 @@ describe('ValueNode', () => {
   })
 
   describe('clone', () => {
-    const node = new ValueNode<number>(0, 1, 1, 1)
+    const node = new ValueNode<number, number>(0, 1, 1, 1)
 
     it('clones the node', () => {
       const res = node.clone()

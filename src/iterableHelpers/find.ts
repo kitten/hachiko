@@ -1,15 +1,15 @@
 import Iterable from '../Iterable'
-import { KVKey, KVTuple, Predicate, Option } from '../constants'
+import { Predicate, Option } from '../constants'
 
-export const find = <T>(
-  iter: Iterable<T>,
+export const find = <K, T>(
+  iter: Iterable<K, T>,
   reverse: boolean,
-  predicate: Predicate<T>,
+  predicate: Predicate<K, T>,
   notSetValue?: T
 ): Option<T> => {
   let result = notSetValue
   iter.__iterate(
-    (value: T, key: KVKey) => {
+    (value: T, key: K) => {
       if (predicate(value, key)) {
         result = value
         return true
@@ -23,16 +23,16 @@ export const find = <T>(
   return result
 }
 
-export const findEntry = <T>(
-  iter: Iterable<T>,
+export const findEntry = <K, T>(
+  iter: Iterable<K, T>,
   reverse: boolean,
-  predicate: Predicate<T>,
+  predicate: Predicate<K, T>,
   notSetValue?: T
-): Option<KVTuple<T> | T> => {
-  let result: Option<KVTuple<T> | T> = notSetValue
+): Option<[K, T] | T> => {
+  let result: Option<[K, T] | T> = notSetValue
 
   iter.__iterate(
-    (value: T, key: KVKey) => {
+    (value: T, key: K) => {
       if (predicate(value, key)) {
         result = [ key, value ]
         return true
@@ -46,16 +46,16 @@ export const findEntry = <T>(
   return result
 }
 
-export const findKey = <T>(
-  iter: Iterable<T>,
+export const findKey = <K, T>(
+  iter: Iterable<K, T>,
   reverse: boolean,
-  predicate: Predicate<T>,
-  notSetValue?: KVKey
-): Option<KVKey> => {
+  predicate: Predicate<K, T>,
+  notSetValue?: K
+): Option<K> => {
   let result = notSetValue
 
   iter.__iterate(
-    (value: T, key: KVKey) => {
+    (value: T, key: K) => {
       if (predicate(value, key)) {
         result = key
         return true

@@ -4,14 +4,14 @@ import Node from '../Node'
 
 describe('BitmapIndexedNode', () => {
   const bitmap = 6
-  const content: Node<number>[] = [
+  const content: Node<number, number>[] = [
     new ValueNode(0, 1, 1, 36),
     new ValueNode(0, 2, 2, 42)
   ]
 
   describe('constructor', () => {
     it('creates an instance correctly', () => {
-      const node = new BitmapIndexedNode<number>(0, content.length, bitmap, content)
+      const node = new BitmapIndexedNode<number, number>(0, content.length, bitmap, content)
 
       expect(node.level).toBe(0)
       expect(node.size).toBe(2)
@@ -22,7 +22,7 @@ describe('BitmapIndexedNode', () => {
 
   describe('get', () => {
     const notSetVal = 999
-    const node = new BitmapIndexedNode<number>(0, content.length, bitmap, content)
+    const node = new BitmapIndexedNode<number, number>(0, content.length, bitmap, content)
 
     it('should return the sub-node when hashCode is known', () => {
       expect(node.get(1, 1)).toBe(36)
@@ -36,12 +36,12 @@ describe('BitmapIndexedNode', () => {
   })
 
   describe('set', () => {
-    const node = new BitmapIndexedNode<number>(0, content.length, bitmap, content)
+    const node = new BitmapIndexedNode<number, number>(0, content.length, bitmap, content)
 
     it('should set new entries as ValueNodes on content array', () => {
       const newKey = 3
       const newValue = 111
-      const result = node.set(newKey, newKey, newValue) as BitmapIndexedNode<number>
+      const result = node.set(newKey, newKey, newValue) as BitmapIndexedNode<number, number>
 
       expect(result.size).toBe(content.length + 1)
       expect(result.bitmap).toBe(14)
@@ -52,7 +52,7 @@ describe('BitmapIndexedNode', () => {
     it('should call set on node when new entry\'s hash-fragment collides', () => {
       const newKey = 2 + 32
       const newValue = 123
-      const result = node.set(newKey, newKey, newValue) as BitmapIndexedNode<number>
+      const result = node.set(newKey, newKey, newValue) as BitmapIndexedNode<number, number>
 
       expect(result.size).toBe(content.length + 1)
       expect(result.bitmap).toBe(6)
@@ -64,7 +64,7 @@ describe('BitmapIndexedNode', () => {
     it('should mutate in place if owner matches', () => {
       const owner = {}
       const first = new BitmapIndexedNode<number>(0, content.length, bitmap, content, owner)
-      const res = first.set(3, 3, 111, owner) as BitmapIndexedNode<number>
+      const res = first.set(3, 3, 111, owner) as BitmapIndexedNode<number, number>
 
       expect(res).toBeInstanceOf(BitmapIndexedNode)
       expect(res).toBe(first)
@@ -73,7 +73,7 @@ describe('BitmapIndexedNode', () => {
   })
 
   describe('delete', () => {
-    const node = new BitmapIndexedNode<number>(0, content.length, bitmap, content)
+    const node = new BitmapIndexedNode<number, number>(0, content.length, bitmap, content)
 
     it('should return unchanged node if hashCode fragment is not on the node', () => {
       const res = node.delete(123, 123, 123)
@@ -149,7 +149,7 @@ describe('BitmapIndexedNode', () => {
       map: mockMap
     }]
 
-    const node = new BitmapIndexedNode<number>(0, mockContent.length, 1, mockContent, owner)
+    const node = new BitmapIndexedNode<number, number>(0, mockContent.length, 1, mockContent, owner)
 
     it('transforms subnodes by recursively calling map on them', () => {
       const transform = x => x
@@ -176,7 +176,7 @@ describe('BitmapIndexedNode', () => {
       const mockIterate2 = jest.fn(() => ({}))
 
       const mockContent = [{ iterate: mockIterate1 }, { iterate: mockIterate2 }]
-      const node = new BitmapIndexedNode<number>(0, mockContent.length, 1, mockContent)
+      const node = new BitmapIndexedNode<number, number>(0, mockContent.length, 1, mockContent)
 
       const step = x => x
       node.iterate(step)
@@ -190,7 +190,7 @@ describe('BitmapIndexedNode', () => {
       const mockIterate2 = jest.fn(() => ({}))
 
       const mockContent = [{ iterate: mockIterate1 }, { iterate: mockIterate2 }]
-      const node = new BitmapIndexedNode<number>(0, mockContent.length, 1, mockContent)
+      const node = new BitmapIndexedNode<number, number>(0, mockContent.length, 1, mockContent)
 
       const step = x => x
       node.iterate(step)
@@ -206,7 +206,7 @@ describe('BitmapIndexedNode', () => {
       const mockIterate2 = jest.fn(() => ({}))
 
       const mockContent = [{ iterateReverse: mockIterate1 }, { iterateReverse: mockIterate2 }]
-      const node = new BitmapIndexedNode<number>(0, mockContent.length, 1, mockContent)
+      const node = new BitmapIndexedNode<number, number>(0, mockContent.length, 1, mockContent)
 
       const step = x => x
       node.iterateReverse(step)
@@ -220,7 +220,7 @@ describe('BitmapIndexedNode', () => {
       const mockIterate2 = jest.fn(() => true)
 
       const mockContent = [{ iterateReverse: mockIterate1 }, { iterateReverse: mockIterate2 }]
-      const node = new BitmapIndexedNode<number>(0, mockContent.length, 1, mockContent)
+      const node = new BitmapIndexedNode<number, number>(0, mockContent.length, 1, mockContent)
 
       const step = x => x
       node.iterateReverse(step)
@@ -231,7 +231,7 @@ describe('BitmapIndexedNode', () => {
   })
 
   describe('clone', () => {
-    const node = new BitmapIndexedNode<number>(0, content.length, bitmap, content)
+    const node = new BitmapIndexedNode<number, number>(0, content.length, bitmap, content)
 
     it('clones the node', () => {
       const res = node.clone()

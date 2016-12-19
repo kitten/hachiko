@@ -1,20 +1,20 @@
 import Node from './Node'
-import { KVKey, Predicate, Transform, Option } from '../constants'
+import { Predicate, Transform, Option } from '../constants'
 import CollisionNode from './CollisionNode'
 import resolveConflict from './resolveConflict'
 
-export default class ValueNode<T> {
+export default class ValueNode<K, T> {
   level: number // NOTE: Receives their level from the parent
   size: number
   hashCode: number
-  key: KVKey
+  key: K
   value: T
   owner?: Object
 
   constructor(
     level: number,
     hashCode: number,
-    key: KVKey,
+    key: K,
     value: T,
     owner?: Object
   ) {
@@ -26,7 +26,7 @@ export default class ValueNode<T> {
     this.owner = owner
   }
 
-  get(hashCode: number, key: KVKey, notSetVal?: T): Option<T> {
+  get(hashCode: number, key: K, notSetVal?: T): Option<T> {
     if (key !== this.key) {
       return notSetVal
     }
@@ -34,14 +34,14 @@ export default class ValueNode<T> {
     return this.value
   }
 
-  set(hashCode: number, key: KVKey, value: T, owner?: Object): Node<T> {
+  set(hashCode: number, key: K, value: T, owner?: Object): Node<K, T> {
     if (key === this.key) {
       if (owner && owner === this.owner) {
         this.value = value
         return this
       }
 
-      return new ValueNode<T>(
+      return new ValueNode<K, T>(
         this.level,
         this.hashCode,
         this.key,
@@ -51,7 +51,7 @@ export default class ValueNode<T> {
     }
 
     if (hashCode === this.hashCode) {
-      const keys: KVKey[] = [ this.key, key ]
+      const keys: K[] = [ this.key, key ]
       const values: T[] = [ this.value, value ]
 
       return new CollisionNode(
@@ -63,17 +63,17 @@ export default class ValueNode<T> {
       )
     }
 
-    return resolveConflict<T>(
+    return resolveConflict<K, T>(
       this.level,
       this.hashCode,
       this.clone(owner),
       hashCode,
-      new ValueNode<T>(0, hashCode, key, value, owner),
+      new ValueNode<K, T>(0, hashCode, key, value, owner),
       owner
     )
   }
 
-  delete(hashCode: number, key: KVKey, owner?: Object): Option<ValueNode<T>> {
+  delete(hashCode: number, key: K, owner?: Object): Option<ValueNode<K, T>> {
     if (key === this.key) {
       return undefined
     }
@@ -81,16 +81,16 @@ export default class ValueNode<T> {
     return this
   }
 
-  map<G>(transform: Transform<T, G>, owner?: Object): Node<G> {
+  map<G>(transform: Transform<K, T, G>, owner?: Object): Node<K, G> {
     const value = transform(this.value, this.key)
 
     if (owner && owner === this.owner) {
-      const res = (this as ValueNode<any>)
+      const res = (this as ValueNode<any, any>)
       res.value = value
-      return (res as ValueNode<G>)
+      return (res as ValueNode<K, G>)
     }
 
-    return new ValueNode<G>(
+    return new ValueNode<K, G>(
       this.level,
       this.hashCode,
       this.key,
@@ -99,16 +99,16 @@ export default class ValueNode<T> {
     )
   }
 
-  iterate(step: Predicate<T>) {
+  iterate(step: Predicate<K, T>) {
     return step(this.value, this.key)
   }
 
-  iterateReverse(step: Predicate<T>) {
+  iterateReverse(step: Predicate<K, T>) {
     return step(this.value, this.key)
   }
 
-  clone(owner?: Object): ValueNode<T> {
-    return new ValueNode<T>(
+  clone(owner?: Object): ValueNode<K, T> {
+    return new ValueNode<K, T>(
       this.level,
       this.hashCode,
       this.key,

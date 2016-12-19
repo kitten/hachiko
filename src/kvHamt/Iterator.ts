@@ -1,37 +1,36 @@
-import { KVKey, KVTuple } from '../constants'
 import Node from './Node'
 import ValueNode from './ValueNode'
 import CollisionNode from './CollisionNode'
 import BitmapIndexedNode from './BitmapIndexedNode'
 import IterableSymbol from '../util/iteratorSymbol'
 
-export class IteratorContext<T> {
-  node: Node<T>
+export class IteratorContext<K, T> {
+  node: Node<K, T>
   index: number
-  prev?: IteratorContext<T>
+  prev?: IteratorContext<K, T>
 
-  constructor(node: Node<T>, prev?: IteratorContext<T>) {
+  constructor(node: Node<K, T>, prev?: IteratorContext<K, T>) {
     this.node = node
     this.prev = prev
     this.index = 0
   }
 }
 
-export interface IteratorResult<T> {
-  value?: T
+export interface IteratorResult<U> {
+  value?: U
   done: boolean
 }
 
-export abstract class Iterator<T, R> {
-  context?: IteratorContext<T>
+export abstract class Iterator<K, T, U> {
+  context?: IteratorContext<K, T>
 
-  constructor(root: Node<T>) {
-    this.context = root && new IteratorContext<T>(root)
+  constructor(root: Node<K, T>) {
+    this.context = root && new IteratorContext<K, T>(root)
   }
 
-  abstract __transform(key: KVKey, value: T): IteratorResult<R>
+  abstract __transform(key: K, value: T): IteratorResult<U>
 
-  next(): IteratorResult<R> {
+  next(): IteratorResult<U> {
     let { context } = this
 
     while (context) {
@@ -39,27 +38,27 @@ export abstract class Iterator<T, R> {
       const index = context.index++
 
       if (node.constructor === CollisionNode) {
-        const { keys, values } = node as CollisionNode<T>
+        const { keys, values } = node as CollisionNode<K, T>
         const maxIndex = keys.length - 1
         if (index <= maxIndex) {
           return this.__transform(keys[index], values[index])
         }
       } else {
-        const { content } = node as BitmapIndexedNode<T>
+        const { content } = node as BitmapIndexedNode<K, T>
         const maxIndex = content.length - 1
         if (index <= maxIndex) {
           const subNode = content[index]
           if (subNode.constructor === ValueNode) {
-            const { key, value } = subNode as ValueNode<T>
+            const { key, value } = subNode as ValueNode<K, T>
             return this.__transform(key, value)
           }
 
-          context = this.context = new IteratorContext<T>(subNode, context)
+          context = this.context = new IteratorContext<K, T>(subNode, context)
           continue
         }
       }
 
-      context = this.context = (this.context as IteratorContext<T>).prev
+      context = this.context = (this.context as IteratorContext<K, T>).prev
     }
 
     return { done: true }
@@ -70,8 +69,8 @@ export abstract class Iterator<T, R> {
   }
 }
 
-export class KeyIterator<T> extends Iterator<T, KVKey> {
-  __transform(key: KVKey, value: T): IteratorResult<KVKey> {
+export class KeyIterator<K, T> extends Iterator<K, T, K> {
+  __transform(key: K, value: T): IteratorResult<K> {
     return {
       value: key,
       done: false
@@ -79,8 +78,8 @@ export class KeyIterator<T> extends Iterator<T, KVKey> {
   }
 }
 
-export class ValueIterator<T> extends Iterator<T, T> {
-  __transform(key: KVKey, value: T): IteratorResult<T> {
+export class ValueIterator<K, T> extends Iterator<K, T, T> {
+  __transform(key: K, value: T): IteratorResult<T> {
     return {
       value: value,
       done: false
@@ -88,8 +87,8 @@ export class ValueIterator<T> extends Iterator<T, T> {
   }
 }
 
-export class EntryIterator<T> extends Iterator<T, KVTuple<T>> {
-  __transform(key: KVKey, value: T): IteratorResult<KVTuple<T>> {
+export class EntryIterator<K, T> extends Iterator<K, T, [K, T]> {
+  __transform(key: K, value: T): IteratorResult<[K, T]> {
     return {
       value: [ key, value ],
       done: false
