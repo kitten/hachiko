@@ -12,8 +12,8 @@ export default function resolveConflict<K, T>(
   owner?: Object
 ): Node<K, T> {
   const nextLevel = level + 1
-  const aPositionBitmap = maskHash(aHashCode, level)
-  const bPositionBitmap = maskHash(bHashCode, level)
+  const aPositionBitmap = 1 << maskHash(aHashCode, level)
+  const bPositionBitmap = 1 << maskHash(bHashCode, level)
 
   if (aPositionBitmap === bPositionBitmap) {
     // Resolve deep conflict

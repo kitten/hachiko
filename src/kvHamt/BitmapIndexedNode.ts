@@ -35,7 +35,7 @@ export default class BitmapIndexedNode<K, T> {
   }
 
   get(hashCode: number, key: K, notSetVal?: T): Option<T> {
-    const positionBitmap = maskHash(hashCode, this.level)
+    const positionBitmap = 1 << maskHash(hashCode, this.level)
     const hasContent = this.bitmap & positionBitmap
 
     if (!hasContent) {
@@ -48,7 +48,7 @@ export default class BitmapIndexedNode<K, T> {
   }
 
   set(hashCode: number, key: K, value: T, owner?: Object): BitmapIndexedNode<K, T> {
-    const positionBitmap = maskHash(hashCode, this.level)
+    const positionBitmap = 1 << maskHash(hashCode, this.level)
     const hasContent = this.bitmap & positionBitmap
 
     if (!hasContent) {
@@ -104,7 +104,7 @@ export default class BitmapIndexedNode<K, T> {
   }
 
   delete(hashCode: number, key: K, owner?: Object): Option<Node<K, T>> {
-    const positionBitmap = maskHash(hashCode, this.level)
+    const positionBitmap = 1 << maskHash(hashCode, this.level)
     const hasContent = this.bitmap & positionBitmap
     if (!hasContent) {
       return this

@@ -96,10 +96,10 @@ describe('CollisionNode', () => {
       expect(bNode.key).toBe(newKey)
       expect(bNode.value).toBe(newValue)
 
-      const aIndex = indexBitOnBitmap(result.bitmap, maskHash(hashCode, 0))
+      const aIndex = indexBitOnBitmap(result.bitmap, 1 << maskHash(hashCode, 0))
       expect(aIndex).toBe(1)
 
-      const bIndex = indexBitOnBitmap(result.bitmap, maskHash(newHashCode, 0))
+      const bIndex = indexBitOnBitmap(result.bitmap, 1 << maskHash(newHashCode, 0))
       expect(bIndex).toBe(0)
     })
   })

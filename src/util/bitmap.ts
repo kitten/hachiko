@@ -15,7 +15,7 @@ const hammingWeight = (x: number): number => {
 }
 
 export const maskHash = (hash: number, level: number): Mask => (
-  1 << ((hash >>> (level * SIZE)) & MASK)
+  (hash >>> (level * SIZE)) & MASK
 )
 
 export const indexBitOnBitmap = (bitmap: Bitmap, positionBitmap: Bitmap): number => (
