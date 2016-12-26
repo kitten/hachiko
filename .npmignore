@@ -2,5 +2,10 @@ rollup.config.js
 .jestrc.json
 .travis.yml
 .editorconfig
+tsconfig.json
+tslint.json
+scripts/
 coverage/
 _book/
+docs/
+benchmark/
