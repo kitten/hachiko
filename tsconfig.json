@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "target": "es3",
-    "importHelpers": true,
-    "noEmitHelpers": true,
+    "importHelpers": false,
+    "noEmitHelpers": false,
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
