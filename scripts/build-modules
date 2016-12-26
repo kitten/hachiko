@@ -1,0 +1,25 @@
+#!/usr/bin/env node
+
+var path = require('path');
+var fs = require('fs');
+var glob = require('glob');
+
+function makeExportFile(file) {
+  return (
+    'module.exports = require(' +
+    "'" + file + "'" +
+    ');'
+  );
+}
+
+glob('./lib/*.js', function (err, files) {
+  if (err) throw err;
+
+  files.forEach(function (file) {
+    var basename = path.basename(file);
+    var targetPath = path.join('./', basename);
+
+    fs.writeFileSync(targetPath, makeExportFile(file));
+  });
+});
+

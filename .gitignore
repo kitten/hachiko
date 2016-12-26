@@ -1,14 +1,22 @@
 # Node
 node_modules
 *.log
+
+# Ignore all dotfiles, except...
+/.*
+!.editorconfig
+!.gitignore
+!.jestrc.json
+!.travis.yml
+
+# Ignore all js files in root, except...
+/*.js
+!rollup.config.js
+
+# Build folders
 lib/
 es/
 dist/
-npm-debug.log
 coverage/
 _book/
-./*.js
 
-# Mac
-.DS_Store
-.*/
