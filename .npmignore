@@ -1,0 +1,6 @@
+rollup.config.js
+.jestrc.json
+.travis.yml
+.editorconfig
+coverage/
+_book/
