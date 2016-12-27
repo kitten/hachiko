@@ -1,6 +1,5 @@
-import { Option } from './constants'
-import ArrayNode from './rrbTree/ArrayNode'
-import LeafNode, { emptyNode } from './rrbTree/LeafNode'
+import ArrayNode from './persistentVector/ArrayNode'
+import LeafNode, { emptyNode } from './persistentVector/LeafNode'
 
 let EMPTY_LIST: List<any>
 export function emptyList<T>(): List<T> {
