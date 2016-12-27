@@ -1,6 +1,6 @@
 import ArrayNode from './ArrayNode'
-import ValueNode from './ValueNode'
+import LeafNode from './LeafNode'
 
-type Node<T> = ArrayNode<T> | ValueNode<T>
+type Node<T> = ArrayNode<T> | LeafNode<T>
 
 export default Node
