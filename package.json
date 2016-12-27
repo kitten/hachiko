@@ -4,6 +4,8 @@
   "main": "lib/index.js",
   "jsnext:main": "es/index.js",
   "module": "es/index.js",
+  "types": "lib/index.d.ts",
+  "typings": "lib/index.d.ts",
   "description": "Hachiko aims to be the easiest, fastest and most practical of all data structure libraries for FP in JS",
   "scripts": {
     "test": "jest --config .jestrc.json",
