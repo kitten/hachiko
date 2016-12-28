@@ -1,4 +1,5 @@
 import ArrayNode from './persistentVector/ArrayNode'
+import push from './listHelpers/push'
 import LeafNode, { emptyNode } from './persistentVector/LeafNode'
 
 let EMPTY_LIST: List<any>
@@ -43,5 +44,9 @@ export default class List<T> {
 
   static isList(object: any) {
     return object && object instanceof List
+  }
+
+  push(value: T): List<T> {
+    return push<T>(this, value)
   }
 }

@@ -1,6 +1,7 @@
 import Node from './Node'
 import { Option } from '../constants'
-import { maskHash } from '../util/bitmap'
+import { replaceValue } from '../util/array'
+import { maskHash } from '../util/bitmap' import LeafNode from './LeafNode'
 
 export default class ArrayNode<T> {
   level: number
@@ -28,5 +29,40 @@ export default class ArrayNode<T> {
     }
 
     return subNode.get(key, notSetVal)
+  }
+
+  setLeafNode(key: number, node: LeafNode<T>, owner?: Object): ArrayNode<T> {
+    const index = maskHash(key, this.level)
+
+    let content: Node<T>[]
+    let size: number
+
+    if (this.level === 0) {
+      content = replaceValue(this.content, index, node)
+      size = this.size + node.size
+    } else {
+      const oldSubNode = (
+        this.content[index] ||
+        new ArrayNode<T>(this.level - 1, [], 0, owner)
+      ) as ArrayNode<T>
+
+      const subNode = oldSubNode.setLeafNode(key, node)
+
+      content = replaceValue(this.content, index, subNode)
+      size = this.size - oldSubNode.size + subNode.size
+    }
+
+    if (owner && owner === this.owner) {
+      this.content = content
+      this.size = size
+      return this
+    }
+
+    return new ArrayNode<T>(
+      this.level,
+      content,
+      size,
+      owner
+    )
   }
 }

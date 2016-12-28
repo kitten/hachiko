@@ -1,4 +1,5 @@
 import { Option } from '../constants'
+import { spliceIn } from '../util/array'
 import { maskHash } from '../util/bitmap'
 
 let EMPY_NODE: LeafNode<any>
@@ -31,5 +32,21 @@ export default class LeafNode<T> {
     }
 
     return this.content[index]
+  }
+
+  push(value: T, owner?: Object): LeafNode<T> {
+    const content = spliceIn<T>(this.content, this.size, value)
+    const size = this.size + 1
+
+    if (owner && owner === this.owner) {
+      this.content = content
+      this.size = size
+      return size
+    }
+
+    return new LeafNode<T>(
+      content,
+      owner
+    )
   }
 }
