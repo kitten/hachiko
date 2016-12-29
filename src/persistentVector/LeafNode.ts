@@ -49,6 +49,7 @@ export default class LeafNode<T> {
   }
 
   map<G>(
+    start: number,
     transform: Transform<number, Option<T>, Option<G>>,
     owner?: Object
   ): Node<G> {
@@ -56,7 +57,7 @@ export default class LeafNode<T> {
     const content: Option<G>[] = new Array(length)
     for (let i = 0; i < length; i++) {
       const value = this.content[i]
-      content[i] = transform(value, i)
+      content[i] = transform(value, start + i)
     }
 
     if (owner && owner === this.owner) {

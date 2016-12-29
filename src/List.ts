@@ -76,10 +76,18 @@ export default class List<T> {
   map<G>(
     transform: Transform<number, Option<T>, Option<G>>
   ): List<G> {
-    const tail = this.tail.map<G>(transform, this.owner) as LeafNode<G>
-    const root = this.root ?
-      this.root.map<G>(transform, this.owner) as ArrayNode<G> :
-      undefined
+    let rootSize: number
+    let root: Option<ArrayNode<G>>
+
+    if (this.root) {
+      root = this.root.map<G>(0, transform, this.owner) as ArrayNode<G>
+      rootSize = this.root.size
+    } else {
+      root = undefined
+      rootSize = 0
+    }
+
+    const tail = this.tail.map<G>(rootSize, transform, this.owner) as LeafNode<G>
 
     if (this.owner) {
       const res = (this as List<any>)
