@@ -23,10 +23,7 @@ function pop<T>(list: List<T>): List<T> {
     return list
   }
 
-  return makeList<T>(
-    tail,
-    root
-  )
+  return makeList<T>(tail, root)
 }
 
 export default pop

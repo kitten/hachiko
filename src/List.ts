@@ -2,6 +2,7 @@ import { Option } from './constants'
 import ArrayNode from './persistentVector/ArrayNode'
 import push from './listHelpers/push'
 import pop from './listHelpers/pop'
+import set from './listHelpers/set'
 import LeafNode, { emptyNode } from './persistentVector/LeafNode'
 
 let EMPTY_LIST: List<any>
@@ -58,6 +59,10 @@ export default class List<T> {
     }
 
     return (root as ArrayNode<T>).get(key, notSetVal)
+  }
+
+  set(key: number, value: T): List<T> {
+    return set<T>(this, key, value)
   }
 
   push(value: T): List<T> {

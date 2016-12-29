@@ -1,11 +1,11 @@
-import { BUCKET_SIZE } from '../constants'
+import { Option, BUCKET_SIZE } from '../constants'
 import List, { makeList } from '../List'
 import appendLeafNode from '../persistentVector/appendLeafNode'
 import LeafNode from '../persistentVector/LeafNode'
 
 function push<T>(
   list: List<T>,
-  value: T
+  value: Option<T>
 ): List<T> {
   let tail = list.tail
   let root = list.root
@@ -29,10 +29,7 @@ function push<T>(
     return list
   }
 
-  return makeList<T>(
-    tail,
-    root
-  )
+  return makeList<T>(tail, root)
 }
 
 export default push

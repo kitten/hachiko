@@ -32,6 +32,34 @@ export default class ArrayNode<T> {
     return subNode.get(key, notSetVal)
   }
 
+  set(key: number, value: T, owner?: Object): ArrayNode<T> {
+    const index = maskHash(key, this.level)
+    if (index >= this.content.length) {
+      return this
+    }
+
+    const oldSubNode = this.content[index]
+    const subNode = oldSubNode.set(key, value, owner)
+
+    if (oldSubNode === subNode) {
+      return this
+    }
+
+    if (owner && owner === this.owner) {
+      this.content[index] = subNode
+      return this
+    }
+
+    const content = replaceValue(this.content, index, subNode)
+
+    return new ArrayNode<T>(
+      this.level,
+      content,
+      this.size,
+      owner
+    )
+  }
+
   pushLeafNode(node: LeafNode<T>, owner?: Object): ArrayNode<T> {
     let content: Node<T>[]
     let size: number
