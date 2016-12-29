@@ -28,8 +28,7 @@ function appendLeafNode<T>(
     )
   }
 
-  return newRoot.setLeafNode(
-    newRoot.size + 1,
+  return newRoot.pushLeafNode(
     node,
     owner
   )

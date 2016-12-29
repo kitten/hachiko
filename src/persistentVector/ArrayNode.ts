@@ -1,6 +1,6 @@
 import Node from './Node'
 import { Option } from '../constants'
-import { copyArray } from '../util/array'
+import { copyArray, push } from '../util/array'
 import { maskHash } from '../util/bitmap'
 import LeafNode from './LeafNode'
 
@@ -32,23 +32,24 @@ export default class ArrayNode<T> {
     return subNode.get(key, notSetVal)
   }
 
-  setLeafNode(key: number, node: LeafNode<T>, owner?: Object): ArrayNode<T> {
-    const index = maskHash(key, this.level)
-
-    const content: Node<T>[] = copyArray(this.content)
+  pushLeafNode(node: LeafNode<T>, owner?: Object): ArrayNode<T> {
+    let content: Node<T>[]
     let size: number
 
     if (this.level === 1) {
-      content[index] = node
+      content = push(this.content, node)
       size = this.size + node.size
     } else {
+      const index = maskHash(this.size, this.level)
+
       const oldSubNode = (
         this.content[index] ||
         new ArrayNode<T>(this.level - 1, [], 0, owner)
       ) as ArrayNode<T>
 
-      const subNode = oldSubNode.setLeafNode(key, node)
+      const subNode = oldSubNode.pushLeafNode(node, owner)
 
+      content = copyArray(this.content)
       content[index] = subNode
       size = this.size - oldSubNode.size + subNode.size
     }
