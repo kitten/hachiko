@@ -73,6 +73,10 @@ export default class List<T> {
     return pop<T>(this)
   }
 
+  clear(): List<T> {
+    return emptyList<T>()
+  }
+
   asMutable(): List<T> {
     if (this.owner) {
       return this
