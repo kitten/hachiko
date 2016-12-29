@@ -1,6 +1,7 @@
 import { Option } from './constants'
 import ArrayNode from './persistentVector/ArrayNode'
 import push from './listHelpers/push'
+import pop from './listHelpers/pop'
 import LeafNode, { emptyNode } from './persistentVector/LeafNode'
 
 let EMPTY_LIST: List<any>
@@ -61,6 +62,10 @@ export default class List<T> {
 
   push(value: T): List<T> {
     return push<T>(this, value)
+  }
+
+  pop(): List<T> {
+    return pop<T>(this)
   }
 
   asMutable(): List<T> {

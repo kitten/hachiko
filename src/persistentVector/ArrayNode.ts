@@ -1,6 +1,6 @@
 import Node from './Node'
-import { Option } from '../constants'
-import { copyArray, push } from '../util/array'
+import { Option, BUCKET_SIZE } from '../constants'
+import { replaceValue, copyArray, push, pop } from '../util/array'
 import { maskHash } from '../util/bitmap'
 import LeafNode from './LeafNode'
 
@@ -38,7 +38,7 @@ export default class ArrayNode<T> {
 
     if (this.level === 1) {
       content = push(this.content, node)
-      size = this.size + node.size
+      size = this.size + BUCKET_SIZE // NOTE: Since node.size should always be BUCKET_SIZE here
     } else {
       const index = maskHash(this.size, this.level)
 
@@ -68,16 +68,55 @@ export default class ArrayNode<T> {
     )
   }
 
-  getLeafNode(key: number): Option<LeafNode<T>> {
-    const index = maskHash(key, this.level)
-    const subNode = this.content[index]
+  popLeafNode(owner?: Object): Option<ArrayNode<T>> {
+    const contentLength = this.content.length
 
-    if (!subNode) {
-      return undefined
-    } else if (this.level === 1) {
+    let content: Node<T>[]
+    let size: number
+
+    if (this.level === 1) {
+      if (contentLength === 1) {
+        return undefined
+      }
+
+      content = pop(this.content)
+      size = this.size - BUCKET_SIZE
+    } else {
+      const index = contentLength - 1
+      const oldSubNode = this.content[index] as ArrayNode<T>
+      const subNode = oldSubNode.popLeafNode(owner)
+
+      if (!subNode && contentLength === 1) {
+        return undefined
+      } else if (!subNode) {
+        content = pop(this.content)
+        size = this.size - oldSubNode.size
+      } else {
+        content = replaceValue(this.content, index, subNode)
+        size = this.size - oldSubNode.size + subNode.size
+      }
+    }
+
+    if (owner && owner === this.owner) {
+      this.content = content
+      this.size = size
+      return this
+    }
+
+    return new ArrayNode<T>(
+      this.level,
+      content,
+      size,
+      owner
+    )
+  }
+
+  lastLeafNode(): LeafNode<T> {
+    const subNode = this.content[this.content.length - 1]
+    if (this.level === 1) {
       return subNode as LeafNode<T>
     }
 
-    return (subNode as ArrayNode<T>).getLeafNode(key)
+    return (subNode as ArrayNode<T>).lastLeafNode()
   }
 }

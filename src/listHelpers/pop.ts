@@ -1,11 +1,17 @@
-import List, { makeList } from '../List'
+import List, { emptyList, makeList } from '../List'
 
 function pop<T>(list: List<T>): List<T> {
   let tail = list.tail
   let root = list.root
 
   if (tail.size === 1) {
-    return list // TODO: Implement tail shift
+    if (!root) {
+      return emptyList<T>()
+    }
+
+    const lastLeafNode = root.lastLeafNode()
+    root = root.popLeafNode(list.owner)
+    tail = lastLeafNode
   } else {
     tail = tail.pop(list.owner)
   }

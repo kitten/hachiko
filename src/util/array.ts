@@ -39,6 +39,17 @@ export const push = <T>(arr: T[], value: T): T[] => {
   return newArr
 }
 
+export const pop = <T>(arr: T[]): T[] => {
+  const newLength = arr.length - 1
+  const newArr = new Array(newLength)
+
+  for (let i = 0; i < newLength; i++) {
+    newArr[i] = arr[i]
+  }
+
+  return newArr
+}
+
 export const spliceOut = <T>(arr: T[], key: number): T[] => {
   const length = arr.length
   const newArr = new Array(length - 1)
