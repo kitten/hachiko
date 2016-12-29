@@ -62,4 +62,29 @@ export default class List<T> {
   push(value: T): List<T> {
     return push<T>(this, value)
   }
+
+  asMutable(): List<T> {
+    if (this.owner) {
+      return this
+    }
+
+    const res = makeList<T>(this.tail, this.root, true)
+    res.owner = {}
+    return res
+  }
+
+  asImmutable(): List<T> {
+    if (!this.size) {
+      return emptyList<T>()
+    }
+
+    this.owner = undefined
+    return this
+  }
+
+  withMutations(closure: (x: List<T>) => void) {
+    let mutable = this.asMutable()
+    closure(mutable)
+    return mutable.asImmutable()
+  }
 }
