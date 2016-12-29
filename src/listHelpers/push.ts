@@ -1,5 +1,7 @@
+import { BUCKET_SIZE } from '../constants'
 import List, { makeList } from '../List'
 import appendLeafNode from '../persistentVector/appendLeafNode'
+import LeafNode from '../persistentVector/LeafNode'
 
 function push<T>(
   list: List<T>,
