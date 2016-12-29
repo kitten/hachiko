@@ -1,5 +1,5 @@
 import Node from './Node'
-import { Option, BUCKET_SIZE } from '../constants'
+import { Transform, Option, BUCKET_SIZE } from '../constants'
 import { replaceValue, copyArray, push, pop } from '../util/array'
 import { maskHash } from '../util/bitmap'
 import LeafNode from './LeafNode'
@@ -53,6 +53,31 @@ export default class ArrayNode<T> {
     const content = replaceValue(this.content, index, subNode)
 
     return new ArrayNode<T>(
+      this.level,
+      content,
+      this.size,
+      owner
+    )
+  }
+
+  map<G>(
+    transform: Transform<number, Option<T>, Option<G>>,
+    owner?: Object
+  ): Node<G> {
+    const length = this.content.length
+    const content: Node<G>[] = new Array(length)
+    for (let i = 0; i < length; i++) {
+      const node = this.content[i]
+      content[i] = node.map<G>(transform, owner)
+    }
+
+    if (owner && owner === this.owner) {
+      const res = (this as ArrayNode<any>)
+      res.content = content
+      return (res as ArrayNode<G>)
+    }
+
+    return new ArrayNode(
       this.level,
       content,
       this.size,

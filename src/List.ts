@@ -1,4 +1,4 @@
-import { Option } from './constants'
+import { Transform, Option } from './constants'
 import ArrayNode from './persistentVector/ArrayNode'
 import push from './listHelpers/push'
 import pop from './listHelpers/pop'
@@ -71,6 +71,24 @@ export default class List<T> {
 
   pop(): List<T> {
     return pop<T>(this)
+  }
+
+  map<G>(
+    transform: Transform<number, Option<T>, Option<G>>
+  ): List<G> {
+    const tail = this.tail.map<G>(transform, this.owner) as LeafNode<G>
+    const root = this.root ?
+      this.root.map<G>(transform, this.owner) as ArrayNode<G> :
+      undefined
+
+    if (this.owner) {
+      const res = (this as List<any>)
+      res.root = root
+      res.tail = tail
+      return (res as List<G>)
+    }
+
+    return makeList<G>(tail, root)
   }
 
   clear(): List<T> {

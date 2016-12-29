@@ -1,4 +1,5 @@
-import { Option } from '../constants'
+import Node from './Node'
+import { Transform, Option } from '../constants'
 import { replaceValue, spliceIn, spliceOut } from '../util/array'
 import { maskHash } from '../util/bitmap'
 
@@ -45,6 +46,26 @@ export default class LeafNode<T> {
 
     const content = replaceValue(this.content, index, value)
     return new LeafNode<T>(content, owner)
+  }
+
+  map<G>(
+    transform: Transform<number, Option<T>, Option<G>>,
+    owner?: Object
+  ): Node<G> {
+    const length = this.content.length
+    const content: Option<G>[] = new Array(length)
+    for (let i = 0; i < length; i++) {
+      const value = this.content[i]
+      content[i] = transform(value, i)
+    }
+
+    if (owner && owner === this.owner) {
+      const res = (this as LeafNode<any>)
+      res.content = content
+      return (res as LeafNode<G>)
+    }
+
+    return new LeafNode(content, owner)
   }
 
   push(value: Option<T>, owner?: Object): LeafNode<T> {
