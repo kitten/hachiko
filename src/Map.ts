@@ -1,7 +1,7 @@
 import { Predicate, Transform, Option } from './constants'
 import hash from './util/hash'
 import BitmapIndexedNode, { emptyNode } from './kvHamt/BitmapIndexedNode'
-import Iterable from './Iterable'
+import KeyedIterable from './KeyedIterable'
 import IteratorSymbol from './util/iteratorSymbol'
 import iterate from './util/iterate'
 
@@ -36,7 +36,7 @@ function makeMap<K, T>(root: BitmapIndexedNode<K, T>, forceCreation = false): Ma
   return res
 }
 
-export default class Map<K, T> extends Iterable<K, T> {
+export default class Map<K, T> extends KeyedIterable<K, T> {
   root: BitmapIndexedNode<K, T>
   size: number
   owner?: Object
