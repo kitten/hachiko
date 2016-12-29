@@ -35,13 +35,11 @@ export default class ArrayNode<T> {
   setLeafNode(key: number, node: LeafNode<T>, owner?: Object): ArrayNode<T> {
     const index = maskHash(key, this.level)
 
-    let content: Node<T>[]
+    const content: Node<T>[] = copyArray(this.content)
     let size: number
 
     if (this.level === 1) {
-      content = copyArray(this.content)
       content[index] = node
-
       size = this.size + node.size
     } else {
       const oldSubNode = (
@@ -51,7 +49,7 @@ export default class ArrayNode<T> {
 
       const subNode = oldSubNode.setLeafNode(key, node)
 
-      content = replaceValue(this.content, index, subNode)
+      content[index] = subNode
       size = this.size - oldSubNode.size + subNode.size
     }
 
