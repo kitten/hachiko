@@ -26,7 +26,7 @@ export default class LeafNode<T> {
   }
 
   get(key: number, notSetVal?: T): Option<T> {
-    const index = maskHash(key, 0)
+    const index = maskHash(key, 0) // NOTE: The LeafNode's level can only be 0
     if (index >= this.size) {
       return notSetVal
     }

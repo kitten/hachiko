@@ -9,7 +9,7 @@ function appendLeafNode<T>(
 ): ArrayNode<T> {
   if (!root) {
     return new ArrayNode<T>(
-      0,
+      1,
       [ node ],
       node.size,
       owner

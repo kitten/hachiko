@@ -5,7 +5,7 @@ import { maskHash } from '../util/bitmap'
 import LeafNode from './LeafNode'
 
 export default class ArrayNode<T> {
-  level: number
+  level: number // NOTE: This can only be >= 1
   content: Node<T>[]
   size: number
   owner?: Object
