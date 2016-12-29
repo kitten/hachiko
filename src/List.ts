@@ -1,4 +1,4 @@
-import { Option, BUCKET_SIZE } from './constants'
+import { Option } from './constants'
 import ArrayNode from './persistentVector/ArrayNode'
 import push from './listHelpers/push'
 import LeafNode, { emptyNode } from './persistentVector/LeafNode'
@@ -48,13 +48,15 @@ export default class List<T> {
   }
 
   get(key: number, notSetVal?: T): Option<T> {
-    if (key < 0 || key >= this.size) {
+    const { size, root, tail } = this
+
+    if (key < 0 || key >= size) {
       return notSetVal
     } else if (key >= (root ? root.size : 0)) {
-      return this.tail.get(key, notSetVal)
+      return tail.get(key, notSetVal)
     }
 
-    return this.root.get(key, notSetVal)
+    return (root as ArrayNode<T>).get(key, notSetVal)
   }
 
   push(value: T): List<T> {

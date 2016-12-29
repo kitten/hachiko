@@ -41,7 +41,7 @@ export default class LeafNode<T> {
     if (owner && owner === this.owner) {
       this.content = content
       this.size = size
-      return size
+      return this
     }
 
     return new LeafNode<T>(
