@@ -1,4 +1,4 @@
-import { Option, BUCKET_SIZE } from '../constants'
+import { Option, SIZE } from '../constants'
 import ArrayNode from './ArrayNode'
 import LeafNode from './LeafNode'
 
@@ -16,7 +16,7 @@ function appendLeafNode<T>(
     )
   }
 
-  const capacity = 1 << ((root.level + 1) * BUCKET_SIZE)
+  const capacity = 1 << ((root.level + 1) * SIZE)
 
   let newRoot = root
   if (root.size >= capacity) {

@@ -1,6 +1,6 @@
 import Node from './Node'
 import { Option } from '../constants'
-import { replaceValue } from '../util/array'
+import { copyArray } from '../util/array'
 import { maskHash } from '../util/bitmap'
 import LeafNode from './LeafNode'
 
@@ -38,8 +38,10 @@ export default class ArrayNode<T> {
     let content: Node<T>[]
     let size: number
 
-    if (this.level === 0) {
-      content = replaceValue(this.content, index, node)
+    if (this.level === 1) {
+      content = copyArray(this.content)
+      content[index] = node
+
       size = this.size + node.size
     } else {
       const oldSubNode = (
