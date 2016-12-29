@@ -65,4 +65,17 @@ export default class ArrayNode<T> {
       owner
     )
   }
+
+  getLeafNode(key: number): LeafNode<T> {
+    const index = maskHash(key, this.level)
+    const subNode = this.content[index]
+
+    if (!subNode) {
+      return undefined
+    } else if (this.level === 0) {
+      return subNode as LeafNode<T>
+    }
+
+    return subNode.getLeafNode(key)
+  }
 }
