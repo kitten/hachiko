@@ -73,7 +73,7 @@ export default class ArrayNode<T> {
 
     if (!subNode) {
       return undefined
-    } else if (this.level === 0) {
+    } else if (this.level === 1) {
       return subNode as LeafNode<T>
     }
 
