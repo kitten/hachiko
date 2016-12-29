@@ -25,7 +25,7 @@ function push<T>(
   if (list.owner) {
     list.tail = tail
     list.root = root
-    list.size = tail.size + (root ? root.size : 0)
+    list.size = list.size + 1
     return list
   }
 
