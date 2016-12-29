@@ -1,5 +1,5 @@
 import Node from './Node'
-import { Transform, Option, SIZE, BUCKET_SIZE } from '../constants'
+import { Predicate, Transform, Option, SIZE, BUCKET_SIZE } from '../constants'
 import { replaceValue, copyArray, push, pop } from '../util/array'
 import { maskHash } from '../util/bitmap'
 import LeafNode from './LeafNode'
@@ -88,6 +88,44 @@ export default class ArrayNode<T> {
       this.size,
       owner
     )
+  }
+
+  iterate(
+    start: number,
+    step: Predicate<number, Option<T>>
+  ) {
+    const subCapacity = 1 << (this.level * SIZE)
+    const length = this.content.length
+
+    for (let i = 0; i < length; i++) {
+      const node: Node<T> = this.content[i]
+      const subStart = start + subCapacity * i
+
+      if (node.iterate(subStart, step) === true) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  iterateReverse(
+    start: number,
+    step: Predicate<number, Option<T>>
+  ) {
+    const subCapacity = 1 << (this.level * SIZE)
+    const length = this.content.length
+
+    for (let i = length - 1; i >= 0; i--) {
+      const node: Node<T> = this.content[i]
+      const subStart = start + subCapacity * i
+
+      if (node.iterateReverse(subStart, step) === true) {
+        return true
+      }
+    }
+
+    return false
   }
 
   pushLeafNode(node: LeafNode<T>, owner?: Object): ArrayNode<T> {

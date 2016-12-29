@@ -1,4 +1,4 @@
-import { Transform, Option } from './constants'
+import { Predicate, Transform, Option } from './constants'
 import ArrayNode from './persistentVector/ArrayNode'
 import push from './listHelpers/push'
 import pop from './listHelpers/pop'
@@ -126,5 +126,35 @@ export default class List<T> {
     let mutable = this.asMutable()
     closure(mutable)
     return mutable.asImmutable()
+  }
+
+  __iterate(
+    step: Predicate<number, Option<T>>,
+    reverse?: boolean
+  ) {
+    if (reverse) {
+      const rootSize = this.root ? this.root.size : 0
+      if (this.tail.iterateReverse(rootSize, step) === true) {
+        return true
+      }
+
+      if (this.root && this.root.iterateReverse(0, step) === true) {
+        return true
+      }
+
+      return false
+    }
+
+    let rootSize: number
+    if (this.root) {
+      rootSize = this.root.size
+      if (this.root.iterate(0, step) === true) {
+        return true
+      }
+    } else {
+      rootSize = 0
+    }
+
+    return this.tail.iterate(rootSize, step)
   }
 }

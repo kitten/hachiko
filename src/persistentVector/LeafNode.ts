@@ -1,5 +1,5 @@
 import Node from './Node'
-import { Transform, Option } from '../constants'
+import { Predicate, Transform, Option } from '../constants'
 import { replaceValue, spliceIn, spliceOut } from '../util/array'
 import { maskHash } from '../util/bitmap'
 
@@ -67,6 +67,36 @@ export default class LeafNode<T> {
     }
 
     return new LeafNode(content, owner)
+  }
+
+  iterate(
+    start: number,
+    step: Predicate<number, Option<T>>
+  ) {
+    const length = this.content.length
+    for (let i = 0; i < length; i++) {
+      const value = this.content[i]
+      if (step(value, start + i) === true) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  iterateReverse(
+    start: number,
+    step: Predicate<number, Option<T>>
+  ) {
+    const length = this.content.length
+    for (let i = length - 1; i >= 0; i--) {
+      const value = this.content[i]
+      if (step(value, start + i) === true) {
+        return true
+      }
+    }
+
+    return false
   }
 
   push(value: Option<T>, owner?: Object): LeafNode<T> {
