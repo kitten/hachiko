@@ -67,7 +67,7 @@ export default class ArrayNode<T> {
     )
   }
 
-  getLeafNode(key: number): LeafNode<T> {
+  getLeafNode(key: number): Option<LeafNode<T>> {
     const index = maskHash(key, this.level)
     const subNode = this.content[index]
 
@@ -77,6 +77,6 @@ export default class ArrayNode<T> {
       return subNode as LeafNode<T>
     }
 
-    return subNode.getLeafNode(key)
+    return (subNode as ArrayNode<T>).getLeafNode(key)
   }
 }
