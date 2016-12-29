@@ -1,4 +1,4 @@
-import { Predicate, Transform, Updater, Option } from './constants'
+import { Predicate, Transform, Option } from './constants'
 import hash from './util/hash'
 import BitmapIndexedNode, { emptyNode } from './kvHamt/BitmapIndexedNode'
 import Iterable from './Iterable'
@@ -83,11 +83,6 @@ export default class Map<K, T> extends Iterable<K, T> {
     }
 
     return makeMap<K, T>(root)
-  }
-
-  update(key: K, updater: Updater<T>): Iterable<K, T> {
-    const value = this.get(key) as T
-    return this.set(key, updater(value))
   }
 
   map<G>(transform: Transform<K, T, G>): Map<K, G> {

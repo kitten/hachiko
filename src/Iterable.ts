@@ -4,6 +4,7 @@ import {
   Reducer,
   Option,
   Transform,
+  Updater,
   Dict
 } from './constants'
 
@@ -46,6 +47,11 @@ abstract class Iterable<K, T> {
 
   isEmpty(): boolean {
     return !this.size
+  }
+
+  update(key: K, updater: Updater<T>): Iterable<K, T> {
+    const value = this.get(key) as T
+    return this.set(key, updater(value))
   }
 
   forEach(sideEffect: (value: T, key: K) => void) {
