@@ -1,7 +1,8 @@
 import Node from './Node'
 import { Option } from '../constants'
 import { replaceValue } from '../util/array'
-import { maskHash } from '../util/bitmap' import LeafNode from './LeafNode'
+import { maskHash } from '../util/bitmap'
+import LeafNode from './LeafNode'
 
 export default class ArrayNode<T> {
   level: number
