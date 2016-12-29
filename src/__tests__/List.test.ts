@@ -85,4 +85,40 @@ describe('List', () => {
       expect(inst.get(31)).toBe('31')
     })
   })
+
+  describe('set', () => {
+    it('correctly sets values and expands root as necessary', () => {
+      const inst = new List().set(0, '0').set(1024, '1024')
+
+      expect(inst.size).toBe(1025)
+      expect(inst.root.size).toBe(1024)
+      expect(inst.tail.size).toBe(1)
+
+      expect(inst).toMatchSnapshot()
+    })
+
+    it('should append a value if necessary', () => {
+      const inst = new List().push('0')
+      expect(inst.get(0)).toBe('0')
+
+      const res = inst.set(1, '1')
+      expect(res.get(0)).toBe('0')
+      expect(res.get(1)).toBe('1')
+    })
+
+    it('should overwrite an old value on the tail', () => {
+      const inst = new List().push('old')
+      const res = inst.set(0, 'new')
+
+      expect(res.get(0)).toBe('new')
+    })
+
+    it('should overwrite an old value on the root', () => {
+      const inst = new List().set(33, '33').set(1, 'old')
+      const res = inst.set(1, 'new')
+
+      expect(res.get(1)).toBe('new')
+      expect(res.get(33)).toBe('33')
+    })
+  })
 })
