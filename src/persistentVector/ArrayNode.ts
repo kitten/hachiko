@@ -34,13 +34,12 @@ export default class ArrayNode<T> {
 
   set(key: number, value: T, owner?: Object): ArrayNode<T> {
     const index = maskHash(key, this.level)
-    if (index >= this.content.length) {
+    const oldSubNode = this.content[index]
+    if (!oldSubNode) {
       return this
     }
 
-    const oldSubNode = this.content[index]
     const subNode = oldSubNode.set(key, value, owner)
-
     if (oldSubNode === subNode) {
       return this
     }
